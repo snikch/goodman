@@ -1,0 +1,148 @@
+package goodman
+
+import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"net"
+)
+
+const (
+	defaultPort             = "61321"
+	defaultMessageDelimiter = "\n"
+)
+
+// Server is responsible for starting a server and running lifecycle callbacks.
+type Server struct {
+	Runner           *Runner
+	Port             string
+	MessageDelimeter []byte
+	conn             net.Conn
+}
+
+func NewServer(runner *Runner) *Server {
+	if runner == nil {
+		runner = NewRunner()
+	}
+	return &Server{
+		Runner:           runner,
+		Port:             defaultPort,
+		MessageDelimeter: []byte(defaultMessageDelimiter),
+	}
+}
+
+func (server *Server) Run() error {
+	ln, err := net.Listen("tcp", ":"+server.Port)
+	if err != nil {
+		return err
+	}
+	conn, err := ln.Accept()
+	if err != nil {
+		return err
+	}
+
+	defer conn.Close()
+	server.conn = conn
+
+	for {
+		body, err := bufio.
+			NewReader(conn).
+			ReadString(byte(server.MessageDelimeter[0]))
+		if err != nil {
+			return err
+		}
+
+		body = body[:len(body)-1]
+		m := &message{}
+		err = json.Unmarshal([]byte(body), m)
+		if err != nil {
+			return err
+		}
+		err = server.ProcessMessage(m)
+		if err != nil {
+			return err
+		}
+	}
+}
+
+func (server *Server) ProcessMessage(m *message) error {
+	switch m.Event {
+	case "beforeAll":
+		fallthrough
+	case "afterAll":
+		m.transactions = []*Transaction{}
+		err := json.Unmarshal(m.Data, &m.transactions)
+		if err != nil {
+			return err
+		}
+	default:
+		m.transaction = &Transaction{}
+		err := json.Unmarshal(m.Data, m.transaction)
+		if err != nil {
+			return err
+		}
+	}
+
+	switch m.Event {
+	case "beforeAll":
+		server.Runner.RunBeforeAll(m.transactions)
+		break
+	case "beforeEach":
+		server.Runner.RunBeforeEach(m.transaction)
+		break
+	case "before":
+		server.Runner.RunBefore(m.transaction)
+		break
+	case "beforeEachValidation":
+		server.Runner.RunBeforeEachValidation(m.transaction)
+		break
+	case "beforeValidation":
+		server.Runner.RunBeforeValidation(m.transaction)
+		break
+	case "after":
+		server.Runner.RunAfter(m.transaction)
+		break
+	case "afterEach":
+		server.Runner.RunAfterEach(m.transaction)
+		break
+	case "afterAll":
+		server.Runner.RunAfterAll(m.transactions)
+		break
+	default:
+		return fmt.Errorf("Unknown event '%s'", m.Event)
+	}
+
+	switch m.Event {
+	case "beforeAll":
+		fallthrough
+	case "afterAll":
+		return server.SendResponse(m, m.transactions)
+	default:
+		return server.SendResponse(m, m.transaction)
+	}
+}
+
+func (server *Server) SendResponse(m *message, dataObj interface{}) error {
+	data, err := json.Marshal(dataObj)
+	if err != nil {
+		return err
+	}
+
+	m.Data = json.RawMessage(data)
+	response, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	server.conn.Write(response)
+	server.conn.Write(server.MessageDelimeter)
+	return nil
+}
+
+type message struct {
+	UUID  string          `json:"uuid"`
+	Event string          `json:"event"`
+	Data  json.RawMessage `json:"data"`
+
+	transaction  *Transaction
+	transactions []*Transaction
+}
