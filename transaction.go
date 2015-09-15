@@ -11,18 +11,22 @@ type Transaction struct {
 	Protocol string `json:"protocol"`
 	FullPath string `json:"fullPath"`
 	Request  struct {
-		Body    string           `json:"body"`
-		Headers *json.RawMessage `json:"headers"`
-		URI     string           `json:"uri"`
-		Method  string           `json:"method"`
+		Body    string                 `json:"body"`
+		Headers map[string]interface{} `json:"headers"`
+		URI     string                 `json:"uri"`
+		Method  string                 `json:"method"`
 	} `json:"request"`
 	Expected *json.RawMessage `json:"expected,omitempty"`
-	Real     *json.RawMessage `json:"real,omitempty"`
-	Origin   *json.RawMessage `json:"origin,omitempty"`
-	Test     *json.RawMessage `json:"test,omitempty"`
-	Results  *json.RawMessage `json:"results,omitempty"`
-	Skip     bool             `json:"skip,omitempty"`
-	Fail     interface{}      `json:"fail,omitempty"`
+	Real     struct {
+		Body       string                 `json:"body"`
+		Headers    map[string]interface{} `json:"headers"`
+		StatusCode int                    `json:"statusCode"`
+	} `json:"real,omitempty"`
+	Origin  *json.RawMessage `json:"origin,omitempty"`
+	Test    *json.RawMessage `json:"test,omitempty"`
+	Results *json.RawMessage `json:"results,omitempty"`
+	Skip    bool             `json:"skip,omitempty"`
+	Fail    interface{}      `json:"fail,omitempty"`
 
 	TestOrder []string `json:"hooks_modifications"`
 }
