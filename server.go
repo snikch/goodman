@@ -93,21 +93,19 @@ func (server *Server) ProcessMessage(m *message) error {
 		server.Runner.RunBeforeAll(m.transactions)
 		break
 	case "beforeEach":
+		// before is run after beforeEach, as no separate event is fired.
 		server.Runner.RunBeforeEach(m.transaction)
-		break
-	case "before":
 		server.Runner.RunBefore(m.transaction)
 		break
 	case "beforeEachValidation":
+		// beforeValidation is run after beforeEachValidation, as no separate event
+		// is fired.
 		server.Runner.RunBeforeEachValidation(m.transaction)
-		break
-	case "beforeValidation":
 		server.Runner.RunBeforeValidation(m.transaction)
 		break
-	case "after":
-		server.Runner.RunAfter(m.transaction)
-		break
 	case "afterEach":
+		// after is run before afterEach as no separate event is fired.
+		server.Runner.RunAfter(m.transaction)
 		server.Runner.RunAfterEach(m.transaction)
 		break
 	case "afterAll":
