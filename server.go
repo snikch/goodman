@@ -32,6 +32,7 @@ func NewServer(runner *Runner) *Server {
 }
 
 func (server *Server) Run() error {
+	fmt.Println("Starting")
 	ln, err := net.Listen("tcp", ":"+server.Port)
 	if err != nil {
 		return err
