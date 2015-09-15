@@ -20,6 +20,8 @@ type Server struct {
 	conn             net.Conn
 }
 
+// NewServer returns a new server instance with the supplied runner. If no
+// runner is supplied, a new one will be created.
 func NewServer(runner *Runner) *Server {
 	if runner == nil {
 		runner = NewRunner()
@@ -31,6 +33,7 @@ func NewServer(runner *Runner) *Server {
 	}
 }
 
+// Run starts the server listening for events from dredd.
 func (server *Server) Run() error {
 	fmt.Println("Starting")
 	ln, err := net.Listen("tcp", ":"+server.Port)
@@ -66,6 +69,7 @@ func (server *Server) Run() error {
 	}
 }
 
+// ProcessMessage handles a single event message.
 func (server *Server) ProcessMessage(m *message) error {
 	switch m.Event {
 	case "beforeAll":
@@ -117,13 +121,14 @@ func (server *Server) ProcessMessage(m *message) error {
 	case "beforeAll":
 		fallthrough
 	case "afterAll":
-		return server.SendResponse(m, m.transactions)
+		return server.sendResponse(m, m.transactions)
 	default:
-		return server.SendResponse(m, m.transaction)
+		return server.sendResponse(m, m.transaction)
 	}
 }
 
-func (server *Server) SendResponse(m *message, dataObj interface{}) error {
+// sendResponse submits the transaction(s) back to dredd.
+func (server *Server) sendResponse(m *message, dataObj interface{}) error {
 	data, err := json.Marshal(dataObj)
 	if err != nil {
 		return err
@@ -139,6 +144,7 @@ func (server *Server) SendResponse(m *message, dataObj interface{}) error {
 	return nil
 }
 
+// message represents a single event received over the connection.
 type message struct {
 	UUID  string          `json:"uuid"`
 	Event string          `json:"event"`

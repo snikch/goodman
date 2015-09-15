@@ -27,8 +27,9 @@ func NewRunner() *Runner {
 }
 
 type (
-	// Callback is a function type that accepts a Transaction pointer.
-	Callback    func(*Transaction)
+	// Callback is a func type that accepts a Transaction pointer.
+	Callback func(*Transaction)
+	// AllCallback is a func type that accepts a slice of Transaction pointers.
 	AllCallback func([]*Transaction)
 )
 
@@ -81,48 +82,56 @@ func (runner *Runner) AfterAll(fn AllCallback) {
 	runner.afterAll = append(runner.afterAll, fn)
 }
 
+// RunBeforeAll runs all beforeAll callbacks.
 func (runner *Runner) RunBeforeAll(transaction []*Transaction) {
 	for _, fn := range runner.beforeAll {
 		fn(transaction)
 	}
 }
 
+// RunBeforeEach runs all beforeEach callbacks.
 func (runner *Runner) RunBeforeEach(transaction *Transaction) {
 	for _, fn := range runner.beforeEach {
 		fn(transaction)
 	}
 }
 
+// RunBefore runs matching before callbacks.
 func (runner *Runner) RunBefore(transaction *Transaction) {
 	for _, fn := range runner.before[transaction.Name] {
 		fn(transaction)
 	}
 }
 
+// RunBeforeEachValidation runs all beforeEachValidation callbacks.
 func (runner *Runner) RunBeforeEachValidation(transaction *Transaction) {
 	for _, fn := range runner.beforeEachValidation {
 		fn(transaction)
 	}
 }
 
+// RunBeforeValidation runs matching beforeValidation callbacks.
 func (runner *Runner) RunBeforeValidation(transaction *Transaction) {
 	for _, fn := range runner.beforeValidation[transaction.Name] {
 		fn(transaction)
 	}
 }
 
+// RunAfter runs matching after callbacks.
 func (runner *Runner) RunAfter(transaction *Transaction) {
 	for _, fn := range runner.after[transaction.Name] {
 		fn(transaction)
 	}
 }
 
+// RunAfterEach runs all afterEach callbacks.
 func (runner *Runner) RunAfterEach(transaction *Transaction) {
 	for _, fn := range runner.afterEach {
 		fn(transaction)
 	}
 }
 
+// RunAfterAll runs all afterAll callbacks.
 func (runner *Runner) RunAfterAll(transaction []*Transaction) {
 	for _, fn := range runner.afterAll {
 		fn(transaction)
