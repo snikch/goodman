@@ -4,7 +4,7 @@ Goodman is a [Dredd](https://github.com/apiaryio/dredd) hook handler implementat
 
 ## Usage
 
-Write your own goodman server, and run it as an argument to Dredd. Note, you'll need to supply an arbitrary `--hookfiles` param, this is required, but the binary is the main one.
+Write your own goodman server, and run it as the `--language` argument to Dredd. Note, you'll need to supply an arbitrary `--hookfiles` param, this is required, but the binary supplied to `--language` is the important argument.
 
 ```
  dredd ./blueprint.apib http://localhost:4567 --server "./my-server" --language ./go-hook-server --hookfiles *.rb
