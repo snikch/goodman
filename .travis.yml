@@ -1,0 +1,10 @@
+language: ruby
+
+install:
+  - npm install -g dredd
+  - cd cucumber
+  - bundle install
+
+script:
+  - cd cucumber
+  - bundle exec cucumber
