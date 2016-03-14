@@ -1,4 +1,7 @@
-language: ruby
+language: go
+
+go:
+  - 1.6
 
 install:
   - npm install -g dredd

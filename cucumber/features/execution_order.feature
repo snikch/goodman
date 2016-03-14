@@ -24,7 +24,7 @@ Feature: Execution order
     Given a file named "../../hookfile.go" with:
     """
     package main
-    import "github.com/snikch/goodman"
+    import "github.com/apiaryio/goodman"
     // NewTestRunner creates a test runner
     func NewTestRunner() *goodman.Runner {
     	runner := goodman.NewRunner()
