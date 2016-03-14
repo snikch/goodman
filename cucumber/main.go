@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/snikch/goodman"
+	"github.com/apiaryio/goodman"
 )
 
 func main() {
