@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 )
 
@@ -52,6 +53,9 @@ func (server *Server) Run() error {
 		body, err := bufio.
 			NewReader(conn).
 			ReadString(byte(server.MessageDelimeter[0]))
+		if err == io.EOF {
+			return nil
+		}
 		if err != nil {
 			return err
 		}
