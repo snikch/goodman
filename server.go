@@ -1,4 +1,4 @@
-package goodman
+package main
 
 import (
 	"bufio"

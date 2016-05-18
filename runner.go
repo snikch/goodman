@@ -1,4 +1,4 @@
-package goodman
+package main
 
 // Runner is responsible for storing and running lifecycle callbacks.
 type Runner struct {
