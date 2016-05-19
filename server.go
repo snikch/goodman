@@ -41,6 +41,7 @@ func (server *Server) Run() error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Accepting connection")
 	conn, err := ln.Accept()
 	if err != nil {
 		return err
@@ -50,9 +51,13 @@ func (server *Server) Run() error {
 	server.conn = conn
 
 	for {
+		fmt.Println("Reading from connection")
 		body, err := bufio.
 			NewReader(conn).
-			ReadString(byte(server.MessageDelimeter[0]))
+			ReadString('\n')
+		// data := make([]byte, 2048)
+		// _, err := conn.Read(data)
+		fmt.Println("Read from socket")
 		if err == io.EOF {
 			return nil
 		}
@@ -62,8 +67,11 @@ func (server *Server) Run() error {
 
 		body = body[:len(body)-1]
 		m := &message{}
+		// data = data[0 : len(data)-2]
+		// fmt.Println(string(data))
 		err = json.Unmarshal([]byte(body), m)
 		if err != nil {
+			fmt.Println("Unmarshal failed")
 			return err
 		}
 		err = server.ProcessMessage(m)
@@ -75,6 +83,7 @@ func (server *Server) Run() error {
 
 // ProcessMessage handles a single event message.
 func (server *Server) ProcessMessage(m *message) error {
+	fmt.Println("Processing message")
 	switch m.Event {
 	case "beforeAll":
 		fallthrough

@@ -42,5 +42,5 @@ Then(/^I should be able to gracefully disconnect$/) do
 end
 
 Given(/^I compile to "(.*)"$/) do | outfile|
-  Kernel.system "go build -o #{outfile}"
+  Kernel.system "go build -o #{outfile} aruba"
 end

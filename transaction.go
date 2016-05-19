@@ -5,19 +5,19 @@ import "encoding/json"
 // Transaction represents a Dredd transaction object.
 // http://dredd.readthedocs.org/en/latest/hooks/#transaction-object-structure
 type Transaction struct {
-	Name     string `json:"name"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Protocol string `json:"protocol"`
-	FullPath string `json:"fullPath"`
-	Request  struct {
-		Body    string                 `json:"body"`
-		Headers map[string]interface{} `json:"headers"`
-		URI     string                 `json:"uri"`
-		Method  string                 `json:"method"`
-	} `json:"request"`
+	Name     string `json:"name,omitempty"`
+	Host     string `json:"host,omitempty"`
+	Port     string `json:"port,omitempty"`
+	Protocol string `json:"protocol,omitempty"`
+	FullPath string `json:"fullPath,omitempty"`
+	Request  *struct {
+		Body    string                 `json:"body,omitempty"`
+		Headers map[string]interface{} `json:"headers,omitempty"`
+		URI     string                 `json:"uri,omitempty"`
+		Method  string                 `json:"method,omitempty"`
+	} `json:"request,omitempty"`
 	Expected *json.RawMessage `json:"expected,omitempty"`
-	Real     struct {
+	Real     *struct {
 		Body       string                 `json:"body"`
 		Headers    map[string]interface{} `json:"headers"`
 		StatusCode int                    `json:"statusCode"`
@@ -28,7 +28,7 @@ type Transaction struct {
 	Skip    bool             `json:"skip,omitempty"`
 	Fail    interface{}      `json:"fail,omitempty"`
 
-	TestOrder []string `json:"hooks_modifications"`
+	TestOrder []string `json:"hooks_modifications,omitempty"`
 }
 
 // AddTestOrderPoint adds a value to the hooks_modification key used when
