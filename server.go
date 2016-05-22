@@ -1,4 +1,4 @@
-package main
+package goodman
 
 import (
 	"bufio"
@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net"
+
+	hooks "github.com/snikch/goodman/hooks"
+	t "github.com/snikch/goodman/transaction"
 )
 
 const (
@@ -13,9 +16,14 @@ const (
 	defaultMessageDelimiter = "\n"
 )
 
+type Run interface {
+	RunnerInterface
+	hooks.HooksServer
+}
+
 // Server is responsible for starting a server and running lifecycle callbacks.
 type Server struct {
-	Runner           *Runner
+	Runner           Run
 	Port             string
 	MessageDelimeter []byte
 	conn             net.Conn
@@ -23,7 +31,7 @@ type Server struct {
 
 // NewServer returns a new server instance with the supplied runner. If no
 // runner is supplied, a new one will be created.
-func NewServer(runner *Runner) *Server {
+func NewServer(runner Run) *Server {
 	if runner == nil {
 		runner = NewRunner()
 	}
@@ -51,13 +59,11 @@ func (server *Server) Run() error {
 	server.conn = conn
 
 	for {
-		fmt.Println("Reading from connection")
+		// fmt.Println("Reading from connection")
 		body, err := bufio.
 			NewReader(conn).
 			ReadString('\n')
-		// data := make([]byte, 2048)
-		// _, err := conn.Read(data)
-		fmt.Println("Read from socket")
+		// fmt.Println("Read from socket")
 		if err == io.EOF {
 			return nil
 		}
@@ -67,11 +73,9 @@ func (server *Server) Run() error {
 
 		body = body[:len(body)-1]
 		m := &message{}
-		// data = data[0 : len(data)-2]
-		// fmt.Println(string(data))
 		err = json.Unmarshal([]byte(body), m)
 		if err != nil {
-			fmt.Println("Unmarshal failed")
+			// fmt.Println("Unmarshal failed")
 			return err
 		}
 		err = server.ProcessMessage(m)
@@ -83,27 +87,27 @@ func (server *Server) Run() error {
 
 // ProcessMessage handles a single event message.
 func (server *Server) ProcessMessage(m *message) error {
-	fmt.Println("Processing message")
-	switch m.Event {
-	case "beforeAll":
-		fallthrough
-	case "afterAll":
-		m.transactions = []*Transaction{}
-		err := json.Unmarshal(m.Data, &m.transactions)
-		if err != nil {
-			return err
-		}
-	default:
-		m.transaction = &Transaction{}
-		err := json.Unmarshal(m.Data, m.transaction)
-		if err != nil {
-			return err
-		}
+	// fmt.Println("Processing message")
+	// switch m.Event {
+	// case "beforeAll":
+	// 	fallthrough
+	// case "afterAll":
+	// 	m.transaction = &t.Transaction{}
+	// 	err := json.Unmarshal(m.Data, &m.transaction)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// default:
+	m.transaction = &t.Transaction{}
+	err := json.Unmarshal(m.Data, m.transaction)
+	if err != nil {
+		return err
 	}
+	// }
 
 	switch m.Event {
 	case "beforeAll":
-		server.Runner.RunBeforeAll(m.transactions)
+		server.Runner.RunBeforeAll(m.transaction)
 		break
 	case "beforeEach":
 		// before is run after beforeEach, as no separate event is fired.
@@ -122,20 +126,20 @@ func (server *Server) ProcessMessage(m *message) error {
 		server.Runner.RunAfterEach(m.transaction)
 		break
 	case "afterAll":
-		server.Runner.RunAfterAll(m.transactions)
+		server.Runner.RunAfterAll(m.transaction)
 		break
 	default:
 		return fmt.Errorf("Unknown event '%s'", m.Event)
 	}
 
-	switch m.Event {
-	case "beforeAll":
-		fallthrough
-	case "afterAll":
-		return server.sendResponse(m, m.transactions)
-	default:
-		return server.sendResponse(m, m.transaction)
-	}
+	// switch m.Event {
+	// case "beforeAll":
+	// 	fallthrough
+	// case "afterAll":
+	// 	return server.sendResponse(m, m.transaction)
+	// default:
+	return server.sendResponse(m, m.transaction)
+	// }
 }
 
 // sendResponse submits the transaction(s) back to dredd.
@@ -161,6 +165,5 @@ type message struct {
 	Event string          `json:"event"`
 	Data  json.RawMessage `json:"data"`
 
-	transaction  *Transaction
-	transactions []*Transaction
+	transaction *t.Transaction
 }

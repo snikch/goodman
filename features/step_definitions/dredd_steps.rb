@@ -41,6 +41,11 @@ Then(/^I should be able to gracefully disconnect$/) do
   @client.close
 end
 
-Given(/^I compile to "(.*)"$/) do | outfile|
-  Kernel.system "go build -o #{outfile} aruba"
+Given(/^I compile to "(.*)"$/) do |outfile|
+  output = `go build -o outfile`
+  # code = `echo $?`
+  puts output
+  # if code != 0
+  raise "Compiling go file failed with output #{output}"
+  # end
 end

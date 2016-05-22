@@ -1,10 +1,8 @@
-package main
+package goodman
 
 import (
 	"bufio"
-	"fmt"
 	"net"
-	"strings"
 	"testing"
 )
 
@@ -34,10 +32,10 @@ func TestSendingServerMessages(t *testing.T) {
 			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterEach\",\"data\":{}}\n"),
 		},
 		{
-			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"beforeAll\",\"data\":[]}\n"),
+			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"beforeAll\",\"data\":{}}\n"),
 		},
 		{
-			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterAll\",\"data\":[]}\n"),
+			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterAll\",\"data\":{}}\n"),
 		},
 	}
 
@@ -49,18 +47,38 @@ func TestSendingServerMessages(t *testing.T) {
 
 	for _, v := range messages {
 
-		n, err := conn.Write(v.Payload)
+		_, err := conn.Write(v.Payload)
 
 		if err != nil {
 			t.Errorf("Sending message %s failed with error %s", string(v.Payload), err.Error())
 		}
 
-		fmt.Printf("Sent %d bytes\n", n)
 		body, err := bufio.NewReader(conn).ReadString(byte('\n'))
-
-		body = strings.TrimSpace(body)
 		if body != string(v.Payload) {
 			t.Errorf("Body of %s does not match the payload of %s", body, string(v.Payload))
 		}
 	}
 }
+
+// Setting runner....
+// Have RPC Server that hooks connect to and pass Runner through.
+
+// func TestRunHooks(t *testing.T) {
+// 	ch := make(chan int)
+// 	go func() {
+// 		RunHooksServer()
+// 		<-ch
+// 	}()
+
+// 	client, err := rpc.DialHTTP("tcp", "localhost:1234")
+// 	if err != nil {
+// 		log.Fatal("dialing:", err)
+// 	}
+// 	args := *new(Test)
+// 	reply := new(bool)
+// 	err = client.Call("HooksServer.Test", args, reply)
+// 	fmt.Println(*reply)
+// 	if err != nil {
+// 		log.Fatal("arith error:", err)
+// 	}
+// }

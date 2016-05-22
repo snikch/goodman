@@ -23,44 +23,49 @@ Feature: Execution order
   Scenario:
     Given a file named "hookfile.go" with:
     """
-    package aruba
+    package main
     import (
       "fmt"
 
-      "github.com/snikch/goodman"
+      "github.com/snikch/goodman/hooks"
+      trans "github.com/snikch/goodman/transaction"
     )
 
-    runner.BeforeAll(func(t []*goodman.Transaction) {
-      fmt.Println("before all modification")
-    })
-    runner.BeforeEach(func(t *goodman.Transaction) {
-      fmt.Println("before each modification")
-    })
-    runner.Before("/message > GET", func(t *goodman.Transaction) {
-      fmt.Println("before modification")
-    })
-    runner.BeforeEachValidation(func(t *goodman.Transaction) {
-      fmt.Println("before each validation modification")
-    })
-    runner.BeforeValidation("/message > GET", func(t *goodman.Transaction) {
-      fmt.Println("before validation modification")
-    })
-    runner.After("/message > GET", func(t *goodman.Transaction) {
-      fmt.Println("after modification")
-    })
-    runner.AfterEach(func(t *goodman.Transaction) {
-      fmt.Println("after each modification")
-    })
-    runner.AfterAll(func(t []*goodman.Transaction) {
-      fmt.Println("after all modification")
-    })
+    func main() {
+
+        h := hooks.Default()
+        h.BeforeAll(func(t *trans.Transaction) {
+          fmt.Println("before all modification")
+        })
+        h.BeforeEach(func(t *trans.Transaction) {
+          fmt.Println("before each modification")
+        })
+        h.Before("/message > GET", func(t *trans.Transaction) {
+          fmt.Println("before modification")
+        })
+        h.BeforeEachValidation(func(t *trans.Transaction) {
+          fmt.Println("before each validation modification")
+        })
+        h.BeforeValidation("/message > GET", func(t *trans.Transaction) {
+          fmt.Println("before validation modification")
+        })
+        h.After("/message > GET", func(t *trans.Transaction) {
+          fmt.Println("after modification")
+        })
+        h.AfterEach(func(t *trans.Transaction) {
+          fmt.Println("after each modification")
+        })
+        h.AfterAll(func(t *trans.Transaction) {
+          fmt.Println("after all modification")
+        })
+    }
     """
-    When I compile to "hookfile-go"
+    When I compile to "hookfile"
     And I set the environment variables to:
       | variable                       | value      |
       | TEST_DREDD_HOOKS_HANDLER_ORDER | true       |
 
-    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "dredd-hooks-go" --hooksfiles hookfile-go`
+    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "dredd-hooks-go" --hookfiles ../tmp/aruba/hookfile-go`
     Then the exit status should be 0
     Then the output should contain:
       """
