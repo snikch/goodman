@@ -27,3 +27,5 @@ cucumber/hookfile-go
 
 goodman
 node_modules/
+tmp/
+bin/
