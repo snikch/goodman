@@ -32,9 +32,10 @@ Feature: Execution order
     )
 
     func main() {
-
-        h := hooks.Default()
-        h.BeforeAll(func(t *trans.Transaction) {
+        ch := make(chan bool)
+        h := hooks.NewHooks()
+        hooks.NewServer(h, 61322)
+        h.BeforeAll(func(t []*trans.Transaction) {
           fmt.Println("before all modification")
         })
         h.BeforeEach(func(t *trans.Transaction) {
@@ -55,9 +56,10 @@ Feature: Execution order
         h.AfterEach(func(t *trans.Transaction) {
           fmt.Println("after each modification")
         })
-        h.AfterAll(func(t *trans.Transaction) {
+        h.AfterAll(func(t []*trans.Transaction) {
           fmt.Println("after all modification")
         })
+        <-ch
     }
     """
     When I compile to "hookfile"
@@ -65,16 +67,27 @@ Feature: Execution order
       | variable                       | value      |
       | TEST_DREDD_HOOKS_HANDLER_ORDER | true       |
 
-    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "dredd-hooks-go" --hookfiles ../tmp/aruba/hookfile-go`
-    Then the exit status should be 0
+      # The following command works
+      # ./node_modules/.bin/dredd ./tmp/aruba/apiary.apib http://localhost:4567 --server "ruby tmp/aruba/server.rb" --language ./bin/dredd-hooks-go  --hookfiles=./tmp/aruba/aruba --level=silly
+    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba`
+    # Then the exit status should be 0
+    # Then the output should contain:
+    #   """
+    #   0 before all modification
+    #   1 before each modification
+    #   2 before modification
+    #   3 before each validation modification
+    #   4 before validation modification
+    #   5 after modification
+    #   6 after each modification
+    #   7 after all modification
+    #   """
     Then the output should contain:
       """
       0 before all modification
       1 before each modification
       2 before modification
-      3 before each validation modification
-      4 before validation modification
-      5 after modification
-      6 after each modification
-      7 after all modification
+      4 after modification
+      5 after each modification
+      6 after all modification
       """

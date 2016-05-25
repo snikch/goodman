@@ -47,7 +47,7 @@ Scenario: Message exchange for event beforeAll
   And I connect to the server
   And I send a JSON message to the socket:
     """
-    {"event": "beforeAll", "uuid": "4234-abcd", "data": {}}
+    {"event": "beforeAll", "uuid": "4234-abcd", "data": []}
     """
   And I send a newline character as a message delimiter to the socket
   Then I should receive same response
@@ -59,7 +59,7 @@ Scenario: Message exchange for event afterAll
   And I connect to the server
   And I send a JSON message to the socket:
     """
-    {"event": "afterAll", "uuid": "5234-abcd", "data": {}}
+    {"event": "afterAll", "uuid": "5234-abcd", "data": []}
     """
   And I send a newline character as a message delimiter to the socket
   Then I should receive same response

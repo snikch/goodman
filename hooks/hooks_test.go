@@ -1,219 +1,173 @@
 package hooks
 
 import (
-	"errors"
-	"fmt"
-	"log"
-	"net"
-	"net/http"
-	"net/rpc"
 	"testing"
 
 	trans "github.com/snikch/goodman/transaction"
 )
 
-const host = "127.0.0.1"
-const port = 1235
+func TestNewHooks(t *testing.T) {
+	hooks := NewHooks()
 
-// This struct implements the HooksServer interface and is used to test the Hook client's behavior independent of the real HooksServer implementation
-type RpcServer struct {
-	Test bool
-}
-
-var beforeCalled = false
-var afterCalled = false
-var beforeAllCalled = false
-var afterAllCalled = false
-var beforeEachCalled = false
-var afterEachCalled = false
-var beforeEachValidationCalled = false
-var beforeValidationCalled = false
-var nullCallbackErrorMessage = "Callback passed to HooksServer is nil"
-
-func (server *RpcServer) Before(args HookCallback, reply *bool) error {
-	beforeCalled = true
-	if args.Fn == nil {
-		return errors.New(nullCallbackErrorMessage)
+	if len(hooks.beforeEach) != 0 {
+		t.Errorf("New hooks should have empty beforeEach hooks")
 	}
-	return nil
-}
 
-func (server *RpcServer) After(args HookCallback, reply *bool) error {
-	afterCalled = true
-	if args.Fn == nil {
-		return errors.New(nullCallbackErrorMessage)
+	if len(hooks.beforeAll) != 0 {
+		t.Errorf("New hooks should have empty beforeAll hooks")
 	}
-	return nil
-}
 
-func (server *RpcServer) BeforeAll(args HookCallback, reply *bool) error {
-	beforeAllCalled = true
-	// out := fmt.Sprintf("HookCallback %#v", args)
-	if args.Fn == nil {
-		return errors.New(nullCallbackErrorMessage)
+	if len(hooks.beforeEachValidation) != 0 {
+		t.Errorf("New hooks should have empty beforeEachValidation hooks")
 	}
-	return nil
-}
 
-func (server *RpcServer) AfterAll(args HookCallback, reply *bool) error {
-	afterAllCalled = true
-	if args.Fn == nil {
-		return errors.New(nullCallbackErrorMessage)
+	if len(hooks.beforeValidation) != 0 {
+		t.Errorf("New hooks should have empty beforeValidation hooks")
 	}
-	return nil
-}
 
-func (server *RpcServer) BeforeEach(args HookCallback, reply *bool) error {
-	beforeEachCalled = true
-	if args.Fn == nil {
-		return errors.New(nullCallbackErrorMessage)
+	if len(hooks.before) != 0 {
+		t.Errorf("New hooks should have empty before hooks")
 	}
-	return nil
-}
 
-func (server *RpcServer) AfterEach(args HookCallback, reply *bool) error {
-	afterEachCalled = true
-	if args.Fn == nil {
-		return errors.New(nullCallbackErrorMessage)
+	if len(hooks.afterEach) != 0 {
+		t.Errorf("New hooks should have empty afterEach hooks")
 	}
-	return nil
-}
 
-func (server *RpcServer) BeforeEachValidation(args HookCallback, reply *bool) error {
-	beforeEachValidationCalled = true
-	if args.Fn == nil {
-		return errors.New(nullCallbackErrorMessage)
-	}
-	return nil
-}
-
-func (server *RpcServer) BeforeValidation(args HookCallback, reply *bool) error {
-	beforeValidationCalled = true
-	if args.Fn == nil {
-		return errors.New(nullCallbackErrorMessage)
-	}
-	return nil
-}
-
-func Serve(serverAddress string, port int) {
-	addr := fmt.Sprintf("%s:%d", serverAddress, port)
-	server := new(RpcServer)
-	rpc.Register(server)
-	rpc.HandleHTTP()
-	l, e := net.Listen("tcp", addr)
-	if e != nil {
-		log.Fatal("listen error:", e)
-	}
-	go http.Serve(l, nil)
-}
-
-// RpcServer must implement the HooksServer interface
-func TestDummyHooksServer(t *testing.T) {
-	var _ HooksServer = &RpcServer{}
-}
-
-// TODO: Does server need to be closed here?
-func TestHooksConnect(t *testing.T) {
-	Serve(host, port)
-	hooks := new(Hooks)
-	err := hooks.connect(host, port)
-
-	if err != nil {
-		t.Errorf("Hooks client failed to connect to server")
+	if len(hooks.afterAll) != 0 {
+		t.Errorf("New hooks should have empty afterAll hooks")
 	}
 }
 
-func TestHooksBefore(t *testing.T) {
-	hooks := new(Hooks)
-	hooks.connect(host, port)
-	hooks.Before("name", func(*trans.Transaction) {
-
-	})
-
-	if !beforeCalled {
-		t.Errorf("Before callback was not sent to RPC server")
+func TestRunnerImplementation(t *testing.T) {
+	name := "name"
+	tss := trans.Transaction{
+		Name: name,
+	}
+	var hooks RunnerRPC
+	var invoked bool
+	cbs := []Callback{
+		func(ts *trans.Transaction) {
+			invoked = true
+		},
+	}
+	allCbs := []AllCallback{
+		func(ts []*trans.Transaction) {
+			invoked = true
+		},
+	}
+	fns := []func(){
+		func() {
+			hooks = &Hooks{
+				beforeAll: allCbs,
+			}
+			hooks.RunBeforeAll([]*trans.Transaction{&tss}, nil)
+		},
+		func() {
+			hooks = &Hooks{
+				beforeEach: cbs,
+			}
+			hooks.RunBeforeEach(tss, &tss)
+		},
+		func() {
+			hooks = &Hooks{
+				beforeEachValidation: cbs,
+			}
+			hooks.RunBeforeEachValidation(tss, &tss)
+		},
+		func() {
+			before := map[string][]Callback{
+				name: cbs,
+			}
+			hooks = &Hooks{
+				before: before,
+			}
+			hooks.RunBefore(tss, &tss)
+		},
+		func() {
+			beforeValidation := map[string][]Callback{
+				name: cbs,
+			}
+			hooks = &Hooks{
+				beforeValidation: beforeValidation,
+			}
+			hooks.RunBeforeValidation(tss, &tss)
+		},
+		func() {
+			after := map[string][]Callback{
+				name: cbs,
+			}
+			hooks = &Hooks{
+				after: after,
+			}
+			hooks.RunAfter(tss, &tss)
+		},
+		func() {
+			hooks = &Hooks{
+				afterEach: cbs,
+			}
+			hooks.RunAfterEach(tss, &tss)
+		},
+		func() {
+			hooks = &Hooks{
+				afterAll: allCbs,
+			}
+			hooks.RunAfterAll([]*trans.Transaction{&tss}, nil)
+		},
+	}
+	for _, hookFn := range fns {
+		invoked = false
+		hookFn()
+		if !invoked {
+			t.Errorf("Callback was never invoked %#v", hookFn)
+		}
 	}
 }
 
-func TestHooksAfter(t *testing.T) {
-	hooks := new(Hooks)
-	hooks.connect(host, port)
-	hooks.After("name", func(*trans.Transaction) {
+func TestDefiningHooks(t *testing.T) {
+	hooks := NewHooks()
+	name := "name"
+	cb := func(ts *trans.Transaction) {}
+	allCb := func(ts []*trans.Transaction) {}
 
-	})
-	if !afterCalled {
-		t.Errorf("After callback was not sent to RPC server")
+	hooks.BeforeAll(allCb)
+	hooks.BeforeEach(cb)
+	hooks.Before(name, cb)
+	hooks.BeforeEachValidation(cb)
+	hooks.BeforeValidation(name, cb)
+	hooks.AfterAll(allCb)
+	hooks.AfterEach(cb)
+	hooks.After(name, cb)
+
+	// TODO: Add more descriptive messages
+	if len(hooks.beforeAll) != 1 {
+		t.Errorf("should have one callback")
 	}
-}
 
-func TestHooksBeforeAll(t *testing.T) {
-	hooks := new(Hooks)
-	hooks.connect(host, port)
-	hooks.BeforeAll(func(*trans.Transaction) {
-
-	})
-
-	if !beforeAllCalled {
-		t.Errorf("BeforeAll callback was not sent to RPC Server")
+	if len(hooks.beforeEach) != 1 {
+		t.Errorf("should have one callback")
 	}
-}
 
-func TestHooksAfterAll(t *testing.T) {
-	hooks := new(Hooks)
-	hooks.connect(host, port)
-	hooks.AfterAll(func(*trans.Transaction) {
-
-	})
-
-	if !afterAllCalled {
-		t.Errorf("AfterAll callback was not sent to RPC Server")
+	if len(hooks.before[name]) != 1 {
+		t.Errorf("should have one callback")
 	}
-}
 
-func TestHooksBeforeEach(t *testing.T) {
-	hooks := new(Hooks)
-	hooks.connect(host, port)
-	hooks.BeforeEach(func(*trans.Transaction) {
-
-	})
-
-	if !beforeEachCalled {
-		t.Errorf("BeforeEach callback was not sent to RPC Server")
+	if len(hooks.beforeEachValidation) != 1 {
+		t.Errorf("should have one callback")
 	}
-}
 
-func TestHooksAfterEach(t *testing.T) {
-	hooks := new(Hooks)
-	hooks.connect(host, port)
-	hooks.AfterEach(func(*trans.Transaction) {
-
-	})
-
-	if !afterEachCalled {
-		t.Errorf("AfterEach callback was not sent to RPC Server")
+	if len(hooks.beforeValidation[name]) != 1 {
+		t.Errorf("should have one callback")
 	}
-}
 
-func TestHooksBeforeEachValidation(t *testing.T) {
-	hooks := new(Hooks)
-	hooks.connect(host, port)
-	hooks.BeforeEachValidation(func(*trans.Transaction) {
-
-	})
-
-	if !beforeEachValidationCalled {
-		t.Errorf("BeforeEachValidation callback was not sent to RPC Server")
+	if len(hooks.afterAll) != 1 {
+		t.Errorf("should have one callback")
 	}
-}
 
-func TestHooksBeforeValidation(t *testing.T) {
-	hooks := new(Hooks)
-	hooks.connect(host, port)
-	hooks.BeforeValidation("name", func(*trans.Transaction) {
+	if len(hooks.afterEach) != 1 {
+		t.Errorf("should have one callback")
+	}
 
-	})
-
-	if !beforeValidationCalled {
-		t.Errorf("BeforeValidation callback was not sent to RPC Server")
+	if len(hooks.after[name]) != 1 {
+		t.Errorf("should have one callback")
 	}
 }

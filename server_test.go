@@ -7,7 +7,8 @@ import (
 )
 
 func TestSendingServerMessages(t *testing.T) {
-	server := NewServer(NewRunner())
+	runner := DummyRunner{}
+	server := NewServer(&runner)
 
 	// ch := make(chan int)
 	go func() {
@@ -32,10 +33,10 @@ func TestSendingServerMessages(t *testing.T) {
 			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterEach\",\"data\":{}}\n"),
 		},
 		{
-			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"beforeAll\",\"data\":{}}\n"),
+			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"beforeAll\",\"data\":[]}\n"),
 		},
 		{
-			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterAll\",\"data\":{}}\n"),
+			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterAll\",\"data\":[]}\n"),
 		},
 	}
 
@@ -59,26 +60,3 @@ func TestSendingServerMessages(t *testing.T) {
 		}
 	}
 }
-
-// Setting runner....
-// Have RPC Server that hooks connect to and pass Runner through.
-
-// func TestRunHooks(t *testing.T) {
-// 	ch := make(chan int)
-// 	go func() {
-// 		RunHooksServer()
-// 		<-ch
-// 	}()
-
-// 	client, err := rpc.DialHTTP("tcp", "localhost:1234")
-// 	if err != nil {
-// 		log.Fatal("dialing:", err)
-// 	}
-// 	args := *new(Test)
-// 	reply := new(bool)
-// 	err = client.Call("HooksServer.Test", args, reply)
-// 	fmt.Println(*reply)
-// 	if err != nil {
-// 		log.Fatal("arith error:", err)
-// 	}
-// }

@@ -42,10 +42,11 @@ Then(/^I should be able to gracefully disconnect$/) do
 end
 
 Given(/^I compile to "(.*)"$/) do |outfile|
-  output = `go build -o outfile`
+  output = `go build -o tmp/aruba/aruba  github.com/snikch/goodman/tmp/aruba`
+  puts `pwd`
   # code = `echo $?`
   puts output
   # if code != 0
-  raise "Compiling go file failed with output #{output}"
+  # raise "Compiling go file failed with output #{output}"
   # end
 end

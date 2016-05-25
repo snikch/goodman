@@ -1,178 +1,126 @@
 package goodman
 
 import (
-	"log"
-	"net"
-	"net/http"
+	"fmt"
 	"net/rpc"
 
-	"github.com/snikch/goodman/hooks"
-	t "github.com/snikch/goodman/transaction"
+	"github.com/snikch/goodman/transaction"
 )
 
-// Runner is responsible for storing and running lifecycle callbacks.
-type Runner struct {
-	beforeAll            []hooks.Callback
-	beforeEach           []hooks.Callback
-	before               map[string][]hooks.Callback
-	beforeEachValidation []hooks.Callback
-	beforeValidation     map[string][]hooks.Callback
-	after                map[string][]hooks.Callback
-	afterEach            []hooks.Callback
-	afterAll             []hooks.Callback
-}
+func NewRunner(rpcService string, port int) *Run {
+	client, err := rpc.DialHTTPPath("tcp", fmt.Sprintf(":%d", port), "/")
 
-// NewRunner returns a new Runner instance will all callback fields initialized.
-func NewRunner() *Runner {
-	return &Runner{
-		beforeAll:            []hooks.Callback{},
-		beforeEach:           []hooks.Callback{},
-		before:               map[string][]hooks.Callback{},
-		beforeEachValidation: []hooks.Callback{},
-		beforeValidation:     map[string][]hooks.Callback{},
-		after:                map[string][]hooks.Callback{},
-		afterEach:            []hooks.Callback{},
-		afterAll:             []hooks.Callback{},
+	if err != nil {
+		panic(err.Error())
+	}
+	return &Run{
+		client:     client,
+		rpcService: rpcService,
 	}
 }
 
-func Start(server *Runner) {
-	addr := "127.0.0.1:61322"
-	if server == nil {
-		server = new(Runner)
-	}
-	rpc.Register(server)
-	rpc.HandleHTTP()
-	l, e := net.Listen("tcp", addr)
-	if e != nil {
-		log.Fatal("listen error:", e)
-	}
-	go http.Serve(l, nil)
+type Run struct {
+	client     *rpc.Client
+	rpcService string
 }
 
-// BeforeAll adds a callback function to be called before the entire test suite.
-func (runner *Runner) BeforeAll(fn hooks.HookCallback, reply *bool) error {
-	runner.beforeAll = append(runner.beforeAll, fn.Fn)
-	return nil
-}
+func (r *Run) RunBeforeAll(t []*transaction.Transaction) {
+	var reply []*transaction.Transaction
+	err := r.client.Call(r.rpcService+".RunBeforeAll", t, &reply)
 
-// BeforeEach adds a callback function to be called before each transaction.
-func (runner *Runner) BeforeEach(fn hooks.HookCallback, reply *bool) error {
-	runner.beforeEach = append(runner.beforeEach, fn.Fn)
-	return nil
-}
-
-// Before adds a callback function to be called before a named transaction.
-func (runner *Runner) Before(fn hooks.HookCallback, reply *bool) error {
-	name := fn.Name
-	if _, ok := runner.before[name]; !ok {
-		runner.before[name] = []hooks.Callback{}
-	}
-	runner.before[name] = append(runner.before[name], fn.Fn)
-	return nil
-}
-
-// BeforeEachValidation adds a callback function to be called before each transaction.
-func (runner *Runner) BeforeEachValidation(fn hooks.HookCallback, reply *bool) error {
-	runner.beforeEachValidation = append(runner.beforeEachValidation, fn.Fn)
-	return nil
-}
-
-// BeforeValidation adds a callback function to be called before a named transaction.
-func (runner *Runner) BeforeValidation(fn hooks.HookCallback, reply *bool) error {
-	name := fn.Name
-	if _, ok := runner.beforeValidation[name]; !ok {
-		runner.beforeValidation[name] = []hooks.Callback{}
-	}
-	runner.beforeValidation[name] = append(runner.beforeValidation[name], fn.Fn)
-	return nil
-}
-
-// After adds a callback function to be called before a named transaction.
-func (runner *Runner) After(fn hooks.HookCallback, reply *bool) error {
-	name := fn.Name
-	if _, ok := runner.after[name]; !ok {
-		runner.after[name] = []hooks.Callback{}
-	}
-	runner.after[name] = append(runner.after[name], fn.Fn)
-	return nil
-}
-
-// AfterEach adds a callback function to be called before each transaction.
-func (runner *Runner) AfterEach(fn hooks.HookCallback, reply *bool) error {
-	runner.afterEach = append(runner.afterEach, fn.Fn)
-	return nil
-}
-
-// AfterAll adds a callback function to be called before the entire test suite.
-func (runner *Runner) AfterAll(fn hooks.HookCallback, reply *bool) error {
-	runner.afterAll = append(runner.afterAll, fn.Fn)
-	return nil
-}
-
-// RunBeforeAll runs all beforeAll callbacks.
-func (runner *Runner) RunBeforeAll(transaction *t.Transaction) {
-	for _, fn := range runner.beforeAll {
-		fn(transaction)
+	if err != nil {
+		panic("RPC client threw error " + err.Error())
 	}
 }
 
-// RunBeforeEach runs all beforeEach callbacks.
-func (runner *Runner) RunBeforeEach(transaction *t.Transaction) {
-	for _, fn := range runner.beforeEach {
-		fn(transaction)
+func (r *Run) RunBeforeEach(t *transaction.Transaction) {
+	var reply transaction.Transaction
+	err := r.client.Call(r.rpcService+".RunBeforeEach", *t, &reply)
+
+	if err != nil {
+		panic("RPC client threw error " + err.Error())
 	}
 }
 
-// RunBefore runs matching before callbacks.
-func (runner *Runner) RunBefore(transaction *t.Transaction) {
-	for _, fn := range runner.before[transaction.Name] {
-		fn(transaction)
+func (r *Run) RunBefore(t *transaction.Transaction) {
+	var reply transaction.Transaction
+	err := r.client.Call(r.rpcService+".RunBefore", *t, &reply)
+
+	if err != nil {
+		panic("RPC client threw error " + err.Error())
 	}
 }
 
-// RunBeforeEachValidation runs all beforeEachValidation callbacks.
-func (runner *Runner) RunBeforeEachValidation(transaction *t.Transaction) {
-	for _, fn := range runner.beforeEachValidation {
-		fn(transaction)
+func (r *Run) RunBeforeEachValidation(t *transaction.Transaction) {
+	var reply transaction.Transaction
+	err := r.client.Call(r.rpcService+".RunBeforeEachValidation", *t, &reply)
+
+	if err != nil {
+		panic("RPC client threw error " + err.Error())
 	}
 }
 
-// RunBeforeValidation runs matching beforeValidation callbacks.
-func (runner *Runner) RunBeforeValidation(transaction *t.Transaction) {
-	for _, fn := range runner.beforeValidation[transaction.Name] {
-		fn(transaction)
+func (r *Run) RunBeforeValidation(t *transaction.Transaction) {
+	var reply transaction.Transaction
+	err := r.client.Call(r.rpcService+".RunBeforeValidation", *t, &reply)
+
+	if err != nil {
+		panic("RPC client threw error " + err.Error())
 	}
 }
 
-// RunAfter runs matching after callbacks.
-func (runner *Runner) RunAfter(transaction *t.Transaction) {
-	for _, fn := range runner.after[transaction.Name] {
-		fn(transaction)
+func (r *Run) RunAfterAll(t []*transaction.Transaction) {
+	var reply []*transaction.Transaction
+	err := r.client.Call(r.rpcService+".RunAfterAll", t, &reply)
+
+	if err != nil {
+		panic("RPC client threw error " + err.Error())
 	}
 }
 
-// RunAfterEach runs all afterEach callbacks.
-func (runner *Runner) RunAfterEach(transaction *t.Transaction) {
-	for _, fn := range runner.afterEach {
-		fn(transaction)
+func (r *Run) RunAfterEach(t *transaction.Transaction) {
+	var reply transaction.Transaction
+	err := r.client.Call(r.rpcService+".RunAfterEach", *t, &reply)
+
+	if err != nil {
+		panic("RPC client threw error " + err.Error())
 	}
 }
 
-// RunAfterAll runs all afterAll callbacks.
-func (runner *Runner) RunAfterAll(transaction *t.Transaction) {
-	for _, fn := range runner.afterAll {
-		fn(transaction)
+func (r *Run) RunAfter(t *transaction.Transaction) {
+	var reply transaction.Transaction
+	err := r.client.Call(r.rpcService+".RunAfter", *t, &reply)
+
+	if err != nil {
+		panic("RPC client threw error " + err.Error())
 	}
 }
 
-type RunnerInterface interface {
-	RunBeforeAll(transaction *t.Transaction)
-	RunBeforeEach(transaction *t.Transaction)
-	RunBefore(transaction *t.Transaction)
-	RunBeforeValidation(transaction *t.Transaction)
-	RunBeforeEachValidation(transaction *t.Transaction)
-	RunAfterAll(transaction *t.Transaction)
-	RunAfterEach(transaction *t.Transaction)
-	RunAfter(transaction *t.Transaction)
+type Runner interface {
+	RunBeforeAll(t []*transaction.Transaction)
+	RunBeforeEach(t *transaction.Transaction)
+	RunBefore(t *transaction.Transaction)
+	RunBeforeEachValidation(t *transaction.Transaction)
+	RunBeforeValidation(t *transaction.Transaction)
+	RunAfterAll(t []*transaction.Transaction)
+	RunAfterEach(t *transaction.Transaction)
+	RunAfter(t *transaction.Transaction)
 }
+
+type DummyRunner struct{}
+
+func (r *DummyRunner) RunBeforeAll(t []*transaction.Transaction) {}
+
+func (r *DummyRunner) RunBeforeEach(t *transaction.Transaction) {}
+
+func (r *DummyRunner) RunBefore(t *transaction.Transaction) {}
+
+func (r *DummyRunner) RunBeforeEachValidation(t *transaction.Transaction) {}
+
+func (r *DummyRunner) RunBeforeValidation(t *transaction.Transaction) {}
+
+func (r *DummyRunner) RunAfterAll(t []*transaction.Transaction) {}
+
+func (r *DummyRunner) RunAfterEach(t *transaction.Transaction) {}
+
+func (r *DummyRunner) RunAfter(t *transaction.Transaction) {}

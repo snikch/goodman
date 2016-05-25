@@ -1,123 +1,241 @@
 package hooks
 
 import (
-	"fmt"
-	"log"
-	"net/rpc"
-
-	"github.com/snikch/goodman/transaction"
+	trans "github.com/snikch/goodman/transaction"
 )
-
-type Hooks struct {
-	Client *rpc.Client
-}
 
 type (
 	// Callback is a func type that accepts a Transaction pointer.
-	Callback func(*transaction.Transaction)
+	Callback func(*trans.Transaction)
+	// AllCallback is a func type that accepts a slice of Transaction pointers.
+	AllCallback func([]*trans.Transaction)
 )
 
-type HookCallback struct {
-	Name string
-	Fn   Callback
+// Runner is responsible for storing and running lifecycle callbacks.
+type Hooks struct {
+	beforeAll            []AllCallback
+	beforeEach           []Callback
+	before               map[string][]Callback
+	beforeEachValidation []Callback
+	beforeValidation     map[string][]Callback
+	after                map[string][]Callback
+	afterEach            []Callback
+	afterAll             []AllCallback
 }
 
-func (h *Hooks) Before(name string, fn Callback) {
-	args := HookCallback{
-		Name: name,
-		Fn:   fn,
+// NewRunner returns a new Runner instance will all callback fields initialized.
+func NewHooks() *Hooks {
+	return &Hooks{
+		beforeAll:            []AllCallback{},
+		beforeEach:           []Callback{},
+		before:               map[string][]Callback{},
+		beforeEachValidation: []Callback{},
+		beforeValidation:     map[string][]Callback{},
+		after:                map[string][]Callback{},
+		afterEach:            []Callback{},
+		afterAll:             []AllCallback{},
 	}
-	h.sendRpcMethod("Before", args)
 }
 
-func (h *Hooks) After(name string, fn Callback) {
-	args := HookCallback{
-		Name: name,
-		Fn:   fn,
+func (h *Hooks) RunBeforeAll(args []*trans.Transaction, reply *[]*trans.Transaction) error {
+	reply = &args
+	for _, cb := range h.beforeAll {
+		cb(args)
 	}
-	h.sendRpcMethod("After", args)
+	return nil
 }
 
-func (h *Hooks) BeforeAll(fn Callback) {
-	args := HookCallback{
-		Fn: fn,
+func (h *Hooks) RunBeforeEach(args trans.Transaction, reply *trans.Transaction) error {
+	reply = &args
+	for _, cb := range h.beforeEach {
+		cb(reply)
 	}
-	h.sendRpcMethod("BeforeAll", args)
+	return nil
 }
-
-func (h *Hooks) AfterAll(fn Callback) {
-	args := HookCallback{
-		Fn: fn,
+func (h *Hooks) RunBefore(args trans.Transaction, reply *trans.Transaction) error {
+	name := args.Name
+	reply = &args
+	for _, cb := range h.before[name] {
+		cb(reply)
 	}
-	h.sendRpcMethod("AfterAll", args)
+	return nil
 }
 
+func (h *Hooks) RunBeforeEachValidation(args trans.Transaction, reply *trans.Transaction) error {
+	reply = &args
+	for _, cb := range h.beforeEachValidation {
+		cb(reply)
+	}
+	return nil
+}
+func (h *Hooks) RunBeforeValidation(args trans.Transaction, reply *trans.Transaction) error {
+	name := args.Name
+	reply = &args
+	for _, cb := range h.beforeValidation[name] {
+		cb(reply)
+	}
+	return nil
+}
+
+func (h *Hooks) RunAfter(args trans.Transaction, reply *trans.Transaction) error {
+	name := args.Name
+	reply = &args
+	for _, cb := range h.after[name] {
+		cb(reply)
+	}
+	return nil
+}
+
+func (h *Hooks) RunAfterEach(args trans.Transaction, reply *trans.Transaction) error {
+	reply = &args
+	for _, cb := range h.afterEach {
+		cb(reply)
+	}
+	return nil
+}
+
+func (h *Hooks) RunAfterAll(args []*trans.Transaction, reply *[]*trans.Transaction) error {
+	reply = &args
+	for _, cb := range h.afterAll {
+		cb(args)
+	}
+	return nil
+}
+
+// BeforeAll adds a callback function to be called before the entire test suite.
+func (h *Hooks) BeforeAll(fn AllCallback) {
+	h.beforeAll = append(h.beforeAll, fn)
+}
+
+// BeforeEach adds a callback function to be called before each transaction.
 func (h *Hooks) BeforeEach(fn Callback) {
-	args := HookCallback{
-		Fn: fn,
-	}
-	h.sendRpcMethod("BeforeEach", args)
+	h.beforeEach = append(h.beforeEach, fn)
 }
 
-func (h *Hooks) AfterEach(fn Callback) {
-	args := HookCallback{
-		Fn: fn,
+// Before adds a callback function to be called before a named transaction.
+func (h *Hooks) Before(name string, fn Callback) {
+	if _, ok := h.before[name]; !ok {
+		h.before[name] = []Callback{}
 	}
-	h.sendRpcMethod("AfterEach", args)
+	h.before[name] = append(h.before[name], fn)
 }
 
+// BeforeEachValidation adds a callback function to be called before each transaction.
 func (h *Hooks) BeforeEachValidation(fn Callback) {
-	args := HookCallback{
-		Fn: fn,
-	}
-	h.sendRpcMethod("BeforeEachValidation", args)
+	h.beforeEachValidation = append(h.beforeEachValidation, fn)
 }
 
+// BeforeValidation adds a callback function to be called before a named transaction.
 func (h *Hooks) BeforeValidation(name string, fn Callback) {
-	args := HookCallback{
-		Name: name,
-		Fn:   fn,
+	if _, ok := h.beforeValidation[name]; !ok {
+		h.beforeValidation[name] = []Callback{}
 	}
-	h.sendRpcMethod("BeforeValidation", args)
+	h.beforeValidation[name] = append(h.beforeValidation[name], fn)
 }
 
-func (h *Hooks) sendRpcMethod(method string, fn HookCallback) error {
-	var reply bool
-	err := h.Client.Call("RpcServer."+method, &fn, &reply)
-
-	if err != nil {
-		// TODO: Remove this, RPC method will not work since it is unable to
-		// serialize functions
-
-		// panic(err.Error())
+// After adds a callback function to be called before a named transaction.
+func (h *Hooks) After(name string, fn Callback) {
+	if _, ok := h.after[name]; !ok {
+		h.after[name] = []Callback{}
 	}
-	return nil
+	h.after[name] = append(h.after[name], fn)
 }
 
-func (h *Hooks) connect(serverAddress string, port int) error {
-	addr := fmt.Sprintf("%s:%d", serverAddress, port)
-	client, err := rpc.DialHTTP("tcp", addr)
-	if err != nil {
-		log.Fatal("dialing: ", err)
-		return err
-	}
-	h.Client = client
-	return nil
+// AfterEach adds a callback function to be called before each transaction.
+func (h *Hooks) AfterEach(fn Callback) {
+	h.afterEach = append(h.afterEach, fn)
 }
 
-func Default() *Hooks {
-	h := &Hooks{}
-	h.connect("127.0.0.1", 61322)
-	return h
+// AfterAll adds a callback function to be called before the entire test suite.
+func (h *Hooks) AfterAll(fn AllCallback) {
+	h.afterAll = append(h.afterAll, fn)
 }
 
-type HooksServer interface {
-	BeforeAll(fn HookCallback, reply *bool) error
-	BeforeEach(fn HookCallback, reply *bool) error
-	Before(fn HookCallback, reply *bool) error
-	BeforeEachValidation(fn HookCallback, reply *bool) error
-	BeforeValidation(fn HookCallback, reply *bool) error
-	After(fn HookCallback, reply *bool) error
-	AfterEach(fn HookCallback, reply *bool) error
-	AfterAll(fn HookCallback, reply *bool) error
-}
+// func (h *Hooks) Before(name string, fn Callback) {
+// 	args := HookCallback{
+// 		Name: name,
+// 		Fn:   fn,
+// 	}
+// 	h.sendRpcMethod("Before", args)
+// }
+
+// func (h *Hooks) After(name string, fn Callback) {
+// 	args := HookCallback{
+// 		Name: name,
+// 		Fn:   fn,
+// 	}
+// 	h.sendRpcMethod("After", args)
+// }
+
+// func (h *Hooks) BeforeAll(fn Callback) {
+// 	args := HookCallback{
+// 		Fn: fn,
+// 	}
+// 	h.sendRpcMethod("BeforeAll", args)
+// }
+
+// func (h *Hooks) AfterAll(fn Callback) {
+// 	args := HookCallback{
+// 		Fn: fn,
+// 	}
+// 	h.sendRpcMethod("AfterAll", args)
+// }
+
+// func (h *Hooks) BeforeEach(fn Callback) {
+// 	args := HookCallback{
+// 		Fn: fn,
+// 	}
+// 	h.sendRpcMethod("BeforeEach", args)
+// }
+
+// func (h *Hooks) AfterEach(fn Callback) {
+// 	args := HookCallback{
+// 		Fn: fn,
+// 	}
+// 	h.sendRpcMethod("AfterEach", args)
+// }
+
+// func (h *Hooks) BeforeEachValidation(fn Callback) {
+// 	args := HookCallback{
+// 		Fn: fn,
+// 	}
+// 	h.sendRpcMethod("BeforeEachValidation", args)
+// }
+
+// func (h *Hooks) BeforeValidation(name string, fn Callback) {
+// 	args := HookCallback{
+// 		Name: name,
+// 		Fn:   fn,
+// 	}
+// 	h.sendRpcMethod("BeforeValidation", args)
+// }
+
+// func (h *Hooks) sendRpcMethod(method string, fn HookCallback) error {
+// 	var reply bool
+// 	err := h.Client.Call("RpcServer."+method, &fn, &reply)
+
+// 	if err != nil {
+// 		// TODO: Remove this, RPC method will not work since it is unable to
+// 		// serialize functions
+
+// 		// panic(err.Error())
+// 	}
+// 	return nil
+// }
+
+// func (h *Hooks) connect(serverAddress string, port int) error {
+// 	addr := fmt.Sprintf("%s:%d", serverAddress, port)
+// 	client, err := rpc.DialHTTP("tcp", addr)
+// 	if err != nil {
+// 		log.Fatal("dialing: ", err)
+// 		return err
+// 	}
+// 	h.Client = client
+// 	return nil
+// }
+
+// func Default() *Hooks {
+// 	h := &Hooks{}
+// 	h.connect("127.0.0.1", 61322)
+// 	return h
+// }
