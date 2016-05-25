@@ -13,28 +13,28 @@ import (
 var run = r.DummyRunner{}
 var port = 61322
 var addr = fmt.Sprintf(":%d", port)
-var serv = NewServer(&run, port)
+var _ = NewServer(&run, port)
 
 func TestServerRunBeforeAllRPC(t *testing.T) {
-	// client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	// if err != nil {
-	// 	log.Fatal("dialing:", err)
-	// }
-	// tss := trans.Transaction{}
-	// args := []*trans.Transaction{
-	// 	&tss,
-	// }
-	// var reply []*trans.Transaction
-	// err = client.Call("DummyRunner.RunBeforeAll", args, &reply)
+	client, err := rpc.DialHTTPPath("tcp", addr, "/")
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	tss := trans.Transaction{}
+	args := []*trans.Transaction{
+		&tss,
+	}
+	var reply []*trans.Transaction
+	err = client.Call("DummyRunner.RunBeforeAll", args, &reply)
 
-	// if err != nil {
-	// 	t.Errorf("rpc client failed to connect to server: %s", err.Error())
-	// }
+	if err != nil {
+		t.Errorf("rpc client failed to connect to server: %s", err.Error())
+	}
 
-	// // Verify that method was invoked
-	// if !run.RunBeforeAllCalled {
-	// 	t.Errorf("RunBeforeAll was never invoked")
-	// }
+	// Verify that method was invoked
+	if !run.RunBeforeAllCalled {
+		t.Errorf("RunBeforeAll was never invoked")
+	}
 }
 
 func TestServerRunBeforeEachRPC(t *testing.T) {
@@ -152,20 +152,20 @@ func TestServerRunAfterEachRPC(t *testing.T) {
 }
 
 func TestServerRunAfterAllRPC(t *testing.T) {
-	// client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	// if err != nil {
-	// 	log.Fatal("dialing:", err)
-	// }
-	// args := trans.Transaction{}
-	// var reply trans.Transaction
-	// err = client.Call("DummyRunner.RunAfterAll", args, &reply)
+	client, err := rpc.DialHTTPPath("tcp", addr, "/")
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	args := []*trans.Transaction{}
+	var reply []*trans.Transaction
+	err = client.Call("DummyRunner.RunAfterAll", args, &reply)
 
-	// if err != nil {
-	// 	t.Errorf("rpc client failed to connect to server: %s", err.Error())
-	// }
+	if err != nil {
+		t.Errorf("rpc client failed to connect to server: %s", err.Error())
+	}
 
-	// // Verify that method was invoked
-	// if !run.RunAfterAllCalled {
-	// 	t.Errorf("RunAfterAll was never invoked")
-	// }
+	// Verify that method was invoked
+	if !run.RunAfterAllCalled {
+		t.Errorf("RunAfterAll was never invoked")
+	}
 }
