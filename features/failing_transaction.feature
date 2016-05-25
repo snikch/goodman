@@ -23,18 +23,26 @@ Feature: Failing a transaction
   Scenario:
     Given a file named "hookfile.go" with:
       """
-      ## Implement before hook failing the transaction by setting string 'Yay! Failed!' as value of key 'fail'
-      ## in the transaction object
-      ##
-      ## So, replace following pseudo code with yours:
-      #
-      #require 'mylanguagehooks'
-      #
-      #before("/message > GET") { |transaction|
-      #  transaction['fail'] == 'Yay! Failed!'
-      #}
-      #
+      package main
+      import (
+        "fmt"
+
+        "github.com/snikch/goodman/hooks"
+        trans "github.com/snikch/goodman/transaction"
+      )
+
+      func main() {
+          ch := make(chan bool)
+          h := hooks.NewHooks()
+          hooks.NewServer(h, 61322)
+          h.Before("/message > GET", func(t *trans.Transaction) {
+              t.Fail = "Yay! Failed!"
+              fmt.Println("Yay! Failed!")
+          })
+          <-ch
+        }
       """
+      Given I compile to "hookfile"
       # When I run `dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language "dredd-hooks-go" --hookfiles ./hookfile.go`
     When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba`
     Then the exit status should be 1
