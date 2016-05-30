@@ -1,8 +1,6 @@
 package hooks
 
-import (
-	trans "github.com/snikch/goodman/transaction"
-)
+import trans "github.com/snikch/goodman/transaction"
 
 type (
 	// Callback is a func type that accepts a Transaction pointer.

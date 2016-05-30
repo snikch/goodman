@@ -4,24 +4,42 @@ import (
 	"fmt"
 	"log"
 	"net/rpc"
+	"os"
+	"os/exec"
 	"testing"
+	"time"
 
 	r "github.com/snikch/goodman/rpc"
 	trans "github.com/snikch/goodman/transaction"
 )
 
 var run = r.DummyRunner{}
-var port = 61322
-var addr = fmt.Sprintf(":%d", port)
 
 func TestServerRPC(t *testing.T) {
-	server := NewServer(&run, port)
-	go func() {
+	hooksServerPort := 61322
+	var addr = fmt.Sprintf(":%d", hooksServerPort)
+	if os.Getenv("RUN_HOOKS") == "1" {
+		server := NewServer(&run)
+		fmt.Println("Running the server")
 		server.Serve()
 		defer server.Listener.Close()
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=TestServerRPC", fmt.Sprintf("-port=%d", hooksServerPort))
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = append(os.Environ(), "RUN_HOOKS=1")
+
+	go func() {
+		err := cmd.Run()
+		fmt.Println("Command exited with error " + err.Error())
 	}()
 
+	time.Sleep(2000 * time.Millisecond)
 	client, err := rpc.DialHTTPPath("tcp", addr, "/")
+	defer cmd.Process.Kill()
+	defer client.Close()
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
@@ -30,45 +48,36 @@ func TestServerRPC(t *testing.T) {
 		Method string
 		args   interface{}
 		reply  interface{}
-		// Pointer needed so that when value is accessed it will
-		// be real value and not a copy.
-		notCalled *bool
 	}{
 		{
-			Method:    "RunBeforeEach",
-			args:      trans.Transaction{},
-			reply:     trans.Transaction{},
-			notCalled: &run.RunBeforeEachCalled,
+			Method: "RunBeforeEach",
+			args:   trans.Transaction{Name: "Test"},
+			reply:  trans.Transaction{},
 		},
 		{
-			Method:    "RunBefore",
-			args:      trans.Transaction{},
-			reply:     trans.Transaction{},
-			notCalled: &run.RunBeforeCalled,
+			Method: "RunBefore",
+			args:   trans.Transaction{Name: "Test"},
+			reply:  trans.Transaction{},
 		},
 		{
-			Method:    "RunBeforeValidation",
-			args:      trans.Transaction{},
-			reply:     trans.Transaction{},
-			notCalled: &run.RunBeforeValidationCalled,
+			Method: "RunBeforeValidation",
+			args:   trans.Transaction{Name: "Test"},
+			reply:  trans.Transaction{},
 		},
 		{
-			Method:    "RunBeforeEachValidation",
-			args:      trans.Transaction{},
-			reply:     trans.Transaction{},
-			notCalled: &run.RunBeforeEachValidationCalled,
+			Method: "RunBeforeEachValidation",
+			args:   trans.Transaction{Name: "Test"},
+			reply:  trans.Transaction{},
 		},
 		{
-			Method:    "RunAfterEach",
-			args:      trans.Transaction{},
-			reply:     trans.Transaction{},
-			notCalled: &run.RunAfterEachCalled,
+			Method: "RunAfterEach",
+			args:   trans.Transaction{Name: "Test"},
+			reply:  trans.Transaction{},
 		},
 		{
-			Method:    "RunAfter",
-			args:      trans.Transaction{},
-			reply:     trans.Transaction{},
-			notCalled: &run.RunAfterCalled,
+			Method: "RunAfter",
+			args:   trans.Transaction{Name: "Test"},
+			reply:  trans.Transaction{},
 		},
 	}
 
@@ -76,53 +85,45 @@ func TestServerRPC(t *testing.T) {
 		args := test.args.(trans.Transaction)
 		reply := test.reply.(trans.Transaction)
 		method := test.Method
-		notCalled := test.notCalled
 		err = client.Call("DummyRunner."+method, args, &reply)
 		if err != nil {
 			t.Errorf("rpc client failed to connect to server: %s", err.Error())
 		}
 
-		if !*notCalled {
+		// DummyRunner will set the transaction to the value of the args variable.
+		// See rpc.go for more detail.
+		if reply.Name != "Test" {
 			t.Errorf("RPC method %s was never invoked", method)
 		}
 	}
 
 	// Testing for RunBeforeAll and RunAfter All
-	var allReply []*trans.Transaction
 	allCases := []struct {
 		Method string
 		args   []*trans.Transaction
-		reply  []*trans.Transaction
-		// Pointer needed so that when value is accessed it will
-		// be real value and not a copy.
-		notCalled *bool
 	}{
 		{
-			Method:    "RunBeforeAll",
-			args:      []*trans.Transaction{&trans.Transaction{}},
-			reply:     allReply,
-			notCalled: &run.RunBeforeAllCalled,
+			Method: "RunBeforeAll",
+			args:   []*trans.Transaction{&trans.Transaction{Name: "Test"}},
 		},
 		{
-			Method:    "RunAfterAll",
-			args:      []*trans.Transaction{&trans.Transaction{}},
-			reply:     allReply,
-			notCalled: &run.RunAfterAllCalled,
+			Method: "RunAfterAll",
+			args:   []*trans.Transaction{&trans.Transaction{Name: "Test"}},
 		},
 	}
 
 	for _, test := range allCases {
 		args := test.args
-		reply := test.reply
+		var reply []*trans.Transaction
 		method := test.Method
-		notCalled := test.notCalled
-		fmt.Println("Running test for " + method)
 		err = client.Call("DummyRunner."+method, args, &reply)
 		if err != nil {
 			t.Errorf("rpc client failed to connect to server: %s", err.Error())
 		}
 
-		if !*notCalled {
+		// DummyRunner will set the transaction to the value of the args variable.
+		// See rpc.go for more detail.
+		if reply[0].Name != "Test" {
 			t.Errorf("RPC method %s was never invoked", method)
 		}
 	}

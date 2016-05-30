@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -14,11 +15,15 @@ type Server struct {
 	Listener net.Listener
 }
 
-func NewServer(run RunnerRPC, port int) *Server {
+func NewServer(run RunnerRPC) *Server {
 	serv := rpc.NewServer()
 	serv.Register(run)
 	serv.HandleHTTP("/", "/debug")
-	l, e := net.Listen("tcp", fmt.Sprintf(":%d", port))
+
+	if *port == 0 {
+		panic("-port flag was not given to hook server")
+	}
+	l, e := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
@@ -40,4 +45,10 @@ type RunnerRPC interface {
 	RunAfter(args trans.Transaction, reply *trans.Transaction) error
 	RunAfterEach(args trans.Transaction, reply *trans.Transaction) error
 	RunAfterAll(args []*trans.Transaction, reply *[]*trans.Transaction) error
+}
+
+var port *int
+
+func init() {
+	port = flag.Int("port", 0, "The port that the hooks server will run on")
 }
