@@ -51,4 +51,5 @@ var port *int
 
 func init() {
 	port = flag.Int("port", 0, "The port that the hooks server will run on")
+	flag.Parse()
 }

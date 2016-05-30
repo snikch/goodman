@@ -35,7 +35,7 @@ Feature: Multiple hook files with a glob
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h, 61322)
+          server := hooks.NewServer(h)
           h.Before("/message > GET", func(t *trans.Transaction) {
             fmt.Println("It's me, File1")
           })
@@ -57,7 +57,7 @@ Feature: Multiple hook files with a glob
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h, 61323)
+          server := hooks.NewServer(h)
           h.Before("/message > GET", func(t *trans.Transaction) {
             fmt.Println("It's me, File2")
           })
@@ -79,7 +79,7 @@ Feature: Multiple hook files with a glob
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h, 61323)
+          server := hooks.NewServer(h)
           h.Before("/message > GET", func(t *trans.Transaction) {
             fmt.Println("It's me, File3")
           })

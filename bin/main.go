@@ -42,7 +42,7 @@ func main() {
 		runners = append(runners, &goodman.DummyRunner{})
 	} else {
 		for _, path := range hookPaths {
-			cmd := exec.Command(path)
+			cmd := exec.Command(path, fmt.Sprintf("-port=%d", hookServerInitalPort))
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			fmt.Println("Sending to channel\n")

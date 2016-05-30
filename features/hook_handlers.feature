@@ -35,7 +35,7 @@ Feature: Hook handlers
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h, 61322)
+          server := hooks.NewServer(h)
           h.BeforeAll(func(t []*trans.Transaction) {
             fmt.Println("before all hook handled")
           })

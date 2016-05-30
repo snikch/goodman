@@ -33,7 +33,7 @@ Feature: Failing a transaction
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h, 61322)
+          server := hooks.NewServer(h)
           h.Before("/message > GET", func(t *trans.Transaction) {
               t.Fail = "Yay! Failed!"
               fmt.Println("Yay! Failed!")
