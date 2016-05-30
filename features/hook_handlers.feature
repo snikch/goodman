@@ -40,15 +40,12 @@ Feature: Hook handlers
             fmt.Println("before all hook handled")
           })
           h.BeforeEach(func(t *trans.Transaction) {
-            fmt.Printf("%#v", t.Request)
             fmt.Println("before each hook handled")
           })
           h.Before("/message > GET", func(t *trans.Transaction) {
-            fmt.Printf("%#v", t.Request)
             fmt.Println("before hook handled")
           })
           h.BeforeEachValidation(func(t *trans.Transaction) {
-            fmt.Printf("%#v", t.Request)
             fmt.Println("before each validation hook handled")
           })
           h.BeforeValidation("/message > GET", func(t *trans.Transaction) {
@@ -69,9 +66,8 @@ Feature: Hook handlers
 
 
       """
-      When I run `go build -o aruba github.com/snikch/goodman/tmp/aruba`
+    When I run `go build -o aruba github.com/snikch/goodman/tmp/aruba`
 
-      # When I run `dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language dredd-hooks-go --hookfiles ./hookfile.go`
     When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba --level silly`
     Then the exit status should be 0
     Then the output should contain:

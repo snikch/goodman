@@ -138,7 +138,6 @@ func TestDefiningHooks(t *testing.T) {
 	hooks.AfterEach(cb)
 	hooks.After(name, cb)
 
-	// TODO: Add more descriptive messages
 	if len(hooks.beforeAll) != 1 {
 		t.Errorf("should have one callback")
 	}

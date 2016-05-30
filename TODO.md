@@ -4,5 +4,3 @@
 - hook_handler.feature fails if the request body is empty
 
 - Glob file path for hooks
-
-- Multiple hooks, port should be passed in via cli flag

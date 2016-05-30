@@ -43,7 +43,6 @@ Feature: Failing a transaction
         }
       """
     When I run `go build -o aruba github.com/snikch/goodman/tmp/aruba`
-      # When I run `dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language "dredd-hooks-go" --hookfiles ./hookfile.go`
     When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba`
     Then the exit status should be 1
     And the output should contain:

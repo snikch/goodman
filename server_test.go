@@ -10,13 +10,11 @@ func TestSendingServerMessages(t *testing.T) {
 	runner := DummyRunner{}
 	server := NewServer([]Runner{&runner})
 
-	// ch := make(chan int)
 	go func() {
 		err := server.Run()
 		if err != nil {
 			t.Fatalf("Dredd hooks server failed to start with error %s", err.Error())
 		}
-		// <-ch
 	}()
 
 	messages := []struct {

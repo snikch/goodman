@@ -103,34 +103,25 @@ func (server *Server) ProcessMessage(m *message) error {
 	switch m.Event {
 	case "beforeAll":
 		server.RunBeforeAll(m.transactions)
-		// server.Runner.RunBeforeAll(m.transactions)
 		break
 	case "beforeEach":
 		// before is run after beforeEach, as no separate event is fired.
 		server.RunBeforeEach(m.transaction)
 		server.RunBefore(m.transaction)
-		// server.Runner.RunBeforeEach(m.transaction)
-		// server.Runner.RunBefore(m.transaction)
 		break
-	// TODO: Do not seem to be receiving this event
 	case "beforeEachValidation":
 		// beforeValidation is run after beforeEachValidation, as no separate event
 		// is fired.
 		server.RunBeforeEachValidation(m.transaction)
 		server.RunBeforeValidation(m.transaction)
-		// server.Runner.RunBeforeEachValidation(m.transaction)
-		// server.Runner.RunBeforeValidation(m.transaction)
 		break
 	case "afterEach":
 		// after is run before afterEach as no separate event is fired.
 		server.RunAfterEach(m.transaction)
 		server.RunAfter(m.transaction)
-		// server.Runner.RunAfter(m.transaction)
-		// server.Runner.RunAfterEach(m.transaction)
 		break
 	case "afterAll":
 		server.RunAfterAll(m.transactions)
-		// server.Runner.RunAfterAll(m.transactions)
 		break
 	default:
 		return fmt.Errorf("Unknown event '%s'", m.Event)

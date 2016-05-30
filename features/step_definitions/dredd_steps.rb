@@ -40,14 +40,3 @@ end
 Then(/^I should be able to gracefully disconnect$/) do
   @client.close
 end
-
-Given(/^I compile to "(.*)"$/) do |outfile|
-  outfile = if outfile == 'aruba' then "" else outfile.split('/')[0] end
-  output = `go build -o tmp/aruba/#{outfile} github.com/snikch/goodman/tmp/aruba/#{outfile.split('/')[0]}`
-  puts `pwd`
-  # code = `echo $?`
-  puts output
-  # if code != 0
-  # raise "Compiling go file failed with output #{output}"
-  # end
-end

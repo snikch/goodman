@@ -69,15 +69,11 @@ Feature: Execution order
         defer server.Listener.Close()
     }
     """
-    When I run `pwd`
     When I run `go build -o aruba github.com/snikch/goodman/tmp/aruba`
-    # When I compile to "aruba"
     And I set the environment variables to:
       | variable                       | value      |
       | TEST_DREDD_HOOKS_HANDLER_ORDER | true       |
 
-      # The following command works
-      # ./node_modules/.bin/dredd ./tmp/aruba/apiary.apib http://localhost:4567 --server "ruby tmp/aruba/server.rb" --language ./bin/dredd-hooks-go  --hookfiles=./tmp/aruba/aruba --level=silly
     When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba`
     Then the exit status should be 0
     Then the output should contain:

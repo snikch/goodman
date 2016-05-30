@@ -26,16 +26,9 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
 	go func() {
-		fmt.Println("Go routine for sigterm")
 		sig := <-c
-		// sig is a ^C, handle it
-		fmt.Printf("Received %#v", sig)
 		closeHooksServers()
 		os.Exit(0)
-		// 	matches, err := path.Glob(path)
-		// 	if matches != nil {
-		// 	    hookPaths = append(hookPaths[:index], hookPaths[index+1:]..., matches...)
-		// 	}
 	}()
 	hooksServerCount = len(args) - 1
 	if len(args) < 2 {
@@ -54,7 +47,6 @@ func main() {
 				if err != nil {
 					fmt.Println("Hooks client failed with " + err.Error())
 				}
-				// os.Exit(0)
 			}()
 			// Must sleep so go routine running hooks server has chance to startup
 			time.Sleep(100 * time.Millisecond)
@@ -75,12 +67,9 @@ func closeHooksServers() {
 	log.Printf("Shutting down hooks servers\n")
 	count := 0
 	for cmd := range cmds {
-		// cmd.Process.Signal(syscall.SIGINT)
 		cmd.Process.Kill()
 		count++
-		fmt.Printf("hookServerCount %d, count = %d\n", hooksServerCount, count)
 		if hooksServerCount == count {
-			fmt.Println("Returning from defer method")
 			return
 		}
 	}
