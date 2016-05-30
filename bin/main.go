@@ -26,7 +26,7 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
 	go func() {
-		sig := <-c
+		<-c
 		closeHooksServers()
 		os.Exit(0)
 	}()
