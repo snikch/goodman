@@ -11,6 +11,7 @@ import (
 )
 
 type Server struct {
+	Listener net.Listener
 }
 
 func NewServer(run RunnerRPC, port int) *Server {
@@ -21,8 +22,13 @@ func NewServer(run RunnerRPC, port int) *Server {
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
-	go http.Serve(l, nil)
-	return &Server{}
+	server := &Server{}
+	server.Listener = l
+	return server
+}
+
+func (s *Server) Serve() {
+	http.Serve(s.Listener, nil)
 }
 
 type RunnerRPC interface {

@@ -42,7 +42,8 @@ Then(/^I should be able to gracefully disconnect$/) do
 end
 
 Given(/^I compile to "(.*)"$/) do |outfile|
-  output = `go build -o tmp/aruba/aruba  github.com/snikch/goodman/tmp/aruba`
+  outfile = if outfile == 'aruba' then "" else outfile.split('/')[0] end
+  output = `go build -o tmp/aruba/#{outfile} github.com/snikch/goodman/tmp/aruba/#{outfile.split('/')[0]}`
   puts `pwd`
   # code = `echo $?`
   puts output

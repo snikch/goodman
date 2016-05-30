@@ -15,6 +15,8 @@ Feature: Hook handlers
       """
       # My Api
       ## GET /message
+      + Request (text)
+          test this
       + Response 200 (text/html;charset=utf-8)
           Hello World!
       """
@@ -32,19 +34,21 @@ Feature: Hook handlers
       )
 
       func main() {
-          ch := make(chan bool)
           h := hooks.NewHooks()
-          hooks.NewServer(h, 61322)
+          server := hooks.NewServer(h, 61322)
           h.BeforeAll(func(t []*trans.Transaction) {
             fmt.Println("before all hook handled")
           })
           h.BeforeEach(func(t *trans.Transaction) {
+            fmt.Printf("%#v", t.Request)
             fmt.Println("before each hook handled")
           })
           h.Before("/message > GET", func(t *trans.Transaction) {
+            fmt.Printf("%#v", t.Request)
             fmt.Println("before hook handled")
           })
           h.BeforeEachValidation(func(t *trans.Transaction) {
+            fmt.Printf("%#v", t.Request)
             fmt.Println("before each validation hook handled")
           })
           h.BeforeValidation("/message > GET", func(t *trans.Transaction) {
@@ -59,24 +63,25 @@ Feature: Hook handlers
           h.AfterAll(func(t []*trans.Transaction) {
             fmt.Println("after all hook handled")
           })
-          <-ch
+          server.Serve()
+          defer server.Listener.Close()
       }
 
 
       """
-      When I compile to "hookfile"
+      When I run `go build -o aruba github.com/snikch/goodman/tmp/aruba`
 
       # When I run `dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language dredd-hooks-go --hookfiles ./hookfile.go`
-    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba --hooks-worker-connect-timeout 3000`
-    # Then the exit status should be 0
+    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba --level silly`
+    Then the exit status should be 0
     Then the output should contain:
       """
       before hook handled
       """
-    # And the output should contain:
-    #   """
-    #   before validation hook handled
-    #   """
+    And the output should contain:
+      """
+      before validation hook handled
+      """
     And the output should contain:
       """
       after hook handled
@@ -85,10 +90,10 @@ Feature: Hook handlers
       """
       before each hook handled
       """
-    # And the output should contain:
-    #   """
-    #   before each validation hook handled
-    #   """
+    And the output should contain:
+      """
+      before each validation hook handled
+      """
     And the output should contain:
       """
       after each hook handled

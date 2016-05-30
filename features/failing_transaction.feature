@@ -32,17 +32,17 @@ Feature: Failing a transaction
       )
 
       func main() {
-          ch := make(chan bool)
           h := hooks.NewHooks()
-          hooks.NewServer(h, 61322)
+          server := hooks.NewServer(h, 61322)
           h.Before("/message > GET", func(t *trans.Transaction) {
               t.Fail = "Yay! Failed!"
               fmt.Println("Yay! Failed!")
           })
-          <-ch
+          server.Serve()
+          defer server.Listener.Close()
         }
       """
-      Given I compile to "hookfile"
+    When I run `go build -o aruba github.com/snikch/goodman/tmp/aruba`
       # When I run `dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language "dredd-hooks-go" --hookfiles ./hookfile.go`
     When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba`
     Then the exit status should be 1

@@ -8,7 +8,7 @@ import (
 
 func TestSendingServerMessages(t *testing.T) {
 	runner := DummyRunner{}
-	server := NewServer(&runner)
+	server := NewServer([]Runner{&runner})
 
 	// ch := make(chan int)
 	go func() {

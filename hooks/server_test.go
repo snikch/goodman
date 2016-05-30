@@ -13,159 +13,117 @@ import (
 var run = r.DummyRunner{}
 var port = 61322
 var addr = fmt.Sprintf(":%d", port)
-var _ = NewServer(&run, port)
 
-func TestServerRunBeforeAllRPC(t *testing.T) {
+func TestServerRPC(t *testing.T) {
+	server := NewServer(&run, port)
+	go func() {
+		server.Serve()
+		defer server.Listener.Close()
+	}()
+
 	client, err := rpc.DialHTTPPath("tcp", addr, "/")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
-	tss := trans.Transaction{}
-	args := []*trans.Transaction{
-		&tss,
-	}
-	var reply []*trans.Transaction
-	err = client.Call("DummyRunner.RunBeforeAll", args, &reply)
 
-	if err != nil {
-		t.Errorf("rpc client failed to connect to server: %s", err.Error())
-	}
-
-	// Verify that method was invoked
-	if !run.RunBeforeAllCalled {
-		t.Errorf("RunBeforeAll was never invoked")
-	}
-}
-
-func TestServerRunBeforeEachRPC(t *testing.T) {
-	client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	args := trans.Transaction{}
-	var reply trans.Transaction
-	err = client.Call("DummyRunner.RunBeforeEach", args, &reply)
-
-	if err != nil {
-		t.Errorf("rpc client failed to connect to server: %s", err.Error())
-	}
-
-	// Verify that method was invoked
-	if !run.RunBeforeEachCalled {
-		t.Errorf("RunBeforeEach was never invoked")
-	}
-}
-
-func TestServerRunBeforeRPC(t *testing.T) {
-	client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	args := trans.Transaction{}
-	var reply trans.Transaction
-	err = client.Call("DummyRunner.RunBefore", args, &reply)
-
-	if err != nil {
-		t.Errorf("rpc client failed to connect to server: %s", err.Error())
+	testCases := []struct {
+		Method string
+		args   interface{}
+		reply  interface{}
+		// Pointer needed so that when value is accessed it will
+		// be real value and not a copy.
+		notCalled *bool
+	}{
+		{
+			Method:    "RunBeforeEach",
+			args:      trans.Transaction{},
+			reply:     trans.Transaction{},
+			notCalled: &run.RunBeforeEachCalled,
+		},
+		{
+			Method:    "RunBefore",
+			args:      trans.Transaction{},
+			reply:     trans.Transaction{},
+			notCalled: &run.RunBeforeCalled,
+		},
+		{
+			Method:    "RunBeforeValidation",
+			args:      trans.Transaction{},
+			reply:     trans.Transaction{},
+			notCalled: &run.RunBeforeValidationCalled,
+		},
+		{
+			Method:    "RunBeforeEachValidation",
+			args:      trans.Transaction{},
+			reply:     trans.Transaction{},
+			notCalled: &run.RunBeforeEachValidationCalled,
+		},
+		{
+			Method:    "RunAfterEach",
+			args:      trans.Transaction{},
+			reply:     trans.Transaction{},
+			notCalled: &run.RunAfterEachCalled,
+		},
+		{
+			Method:    "RunAfter",
+			args:      trans.Transaction{},
+			reply:     trans.Transaction{},
+			notCalled: &run.RunAfterCalled,
+		},
 	}
 
-	// Verify that method was invoked
-	if !run.RunBeforeCalled {
-		t.Errorf("RunBefore was never invoked")
-	}
-}
+	for _, test := range testCases {
+		args := test.args.(trans.Transaction)
+		reply := test.reply.(trans.Transaction)
+		method := test.Method
+		notCalled := test.notCalled
+		err = client.Call("DummyRunner."+method, args, &reply)
+		if err != nil {
+			t.Errorf("rpc client failed to connect to server: %s", err.Error())
+		}
 
-func TestServerRunBeforeEachValidationRPC(t *testing.T) {
-	client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	args := trans.Transaction{}
-	var reply trans.Transaction
-	err = client.Call("DummyRunner.RunBeforeEachValidation", args, &reply)
-
-	if err != nil {
-		t.Errorf("rpc client failed to connect to server: %s", err.Error())
+		if !*notCalled {
+			t.Errorf("RPC method %s was never invoked", method)
+		}
 	}
 
-	// Verify that method was invoked
-	if !run.RunBeforeEachValidationCalled {
-		t.Errorf("RunBeforeEachValidation was never invoked")
-	}
-}
-
-func TestServerRunBeforeValidationRPC(t *testing.T) {
-	client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	args := trans.Transaction{}
-	var reply trans.Transaction
-	err = client.Call("DummyRunner.RunBeforeValidation", args, &reply)
-
-	if err != nil {
-		t.Errorf("rpc client failed to connect to server: %s", err.Error())
-	}
-
-	// Verify that method was invoked
-	if !run.RunBeforeValidationCalled {
-		t.Errorf("RunBeforeValidation was never invoked")
-	}
-}
-
-func TestServerRunAfterRPC(t *testing.T) {
-	client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	args := trans.Transaction{}
-	var reply trans.Transaction
-	err = client.Call("DummyRunner.RunAfter", args, &reply)
-
-	if err != nil {
-		t.Errorf("rpc client failed to connect to server: %s", err.Error())
+	// Testing for RunBeforeAll and RunAfter All
+	var allReply []*trans.Transaction
+	allCases := []struct {
+		Method string
+		args   []*trans.Transaction
+		reply  []*trans.Transaction
+		// Pointer needed so that when value is accessed it will
+		// be real value and not a copy.
+		notCalled *bool
+	}{
+		{
+			Method:    "RunBeforeAll",
+			args:      []*trans.Transaction{&trans.Transaction{}},
+			reply:     allReply,
+			notCalled: &run.RunBeforeAllCalled,
+		},
+		{
+			Method:    "RunAfterAll",
+			args:      []*trans.Transaction{&trans.Transaction{}},
+			reply:     allReply,
+			notCalled: &run.RunAfterAllCalled,
+		},
 	}
 
-	// Verify that method was invoked
-	if !run.RunAfterCalled {
-		t.Errorf("RunAfter was never invoked")
-	}
-}
+	for _, test := range allCases {
+		args := test.args
+		reply := test.reply
+		method := test.Method
+		notCalled := test.notCalled
+		fmt.Println("Running test for " + method)
+		err = client.Call("DummyRunner."+method, args, &reply)
+		if err != nil {
+			t.Errorf("rpc client failed to connect to server: %s", err.Error())
+		}
 
-func TestServerRunAfterEachRPC(t *testing.T) {
-	client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	args := trans.Transaction{}
-	var reply trans.Transaction
-	err = client.Call("DummyRunner.RunAfterEach", args, &reply)
-
-	if err != nil {
-		t.Errorf("rpc client failed to connect to server: %s", err.Error())
-	}
-
-	// Verify that method was invoked
-	if !run.RunAfterEachCalled {
-		t.Errorf("RunAfterEach was never invoked")
-	}
-}
-
-func TestServerRunAfterAllRPC(t *testing.T) {
-	client, err := rpc.DialHTTPPath("tcp", addr, "/")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	args := []*trans.Transaction{}
-	var reply []*trans.Transaction
-	err = client.Call("DummyRunner.RunAfterAll", args, &reply)
-
-	if err != nil {
-		t.Errorf("rpc client failed to connect to server: %s", err.Error())
-	}
-
-	// Verify that method was invoked
-	if !run.RunAfterAllCalled {
-		t.Errorf("RunAfterAll was never invoked")
+		if !*notCalled {
+			t.Errorf("RPC method %s was never invoked", method)
+		}
 	}
 }

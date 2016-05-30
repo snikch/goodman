@@ -28,4 +28,4 @@ cucumber/hookfile-go
 goodman
 node_modules/
 tmp/
-bin/
+bin/dredd-hooks-go

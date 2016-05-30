@@ -15,6 +15,8 @@ Feature: Execution order
       """
       # My Api
       ## GET /message
+      + Request (text)
+          This prevents a dredd bug
       + Response 200 (text/html;charset=utf-8)
           Hello World!
       """
@@ -32,19 +34,22 @@ Feature: Execution order
     )
 
     func main() {
-        ch := make(chan bool)
         h := hooks.NewHooks()
-        hooks.NewServer(h, 61322)
+        server := hooks.NewServer(h, 61322)
         h.BeforeAll(func(t []*trans.Transaction) {
+          fmt.Printf("%#v", t)
           fmt.Println("before all modification")
         })
         h.BeforeEach(func(t *trans.Transaction) {
+          fmt.Printf("%#v", t)
           fmt.Println("before each modification")
         })
         h.Before("/message > GET", func(t *trans.Transaction) {
+          fmt.Printf("%#v", t)
           fmt.Println("before modification")
         })
         h.BeforeEachValidation(func(t *trans.Transaction) {
+          fmt.Printf("%#v", t)
           fmt.Println("before each validation modification")
         })
         h.BeforeValidation("/message > GET", func(t *trans.Transaction) {
@@ -59,10 +64,14 @@ Feature: Execution order
         h.AfterAll(func(t []*trans.Transaction) {
           fmt.Println("after all modification")
         })
-        <-ch
+
+        server.Serve()
+        defer server.Listener.Close()
     }
     """
-    When I compile to "hookfile"
+    When I run `pwd`
+    When I run `go build -o aruba github.com/snikch/goodman/tmp/aruba`
+    # When I compile to "aruba"
     And I set the environment variables to:
       | variable                       | value      |
       | TEST_DREDD_HOOKS_HANDLER_ORDER | true       |
@@ -70,24 +79,15 @@ Feature: Execution order
       # The following command works
       # ./node_modules/.bin/dredd ./tmp/aruba/apiary.apib http://localhost:4567 --server "ruby tmp/aruba/server.rb" --language ./bin/dredd-hooks-go  --hookfiles=./tmp/aruba/aruba --level=silly
     When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language ../../bin/dredd-hooks-go --hookfiles ./aruba`
-    # Then the exit status should be 0
-    # Then the output should contain:
-    #   """
-    #   0 before all modification
-    #   1 before each modification
-    #   2 before modification
-    #   3 before each validation modification
-    #   4 before validation modification
-    #   5 after modification
-    #   6 after each modification
-    #   7 after all modification
-    #   """
+    Then the exit status should be 0
     Then the output should contain:
       """
       0 before all modification
       1 before each modification
       2 before modification
-      4 after modification
-      5 after each modification
-      6 after all modification
+      3 before each validation modification
+      4 before validation modification
+      5 after modification
+      6 after each modification
+      7 after all modification
       """

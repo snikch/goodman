@@ -96,6 +96,12 @@ func (r *Run) RunAfter(t *transaction.Transaction) {
 	}
 }
 
+func (r *Run) Close() {
+	if err := r.client.Close(); err != nil {
+		panic("RPC client threw error on Close() " + err.Error())
+	}
+}
+
 type Runner interface {
 	RunBeforeAll(t []*transaction.Transaction)
 	RunBeforeEach(t *transaction.Transaction)
@@ -105,6 +111,7 @@ type Runner interface {
 	RunAfterAll(t []*transaction.Transaction)
 	RunAfterEach(t *transaction.Transaction)
 	RunAfter(t *transaction.Transaction)
+	Close()
 }
 
 type DummyRunner struct{}
@@ -124,3 +131,5 @@ func (r *DummyRunner) RunAfterAll(t []*transaction.Transaction) {}
 func (r *DummyRunner) RunAfterEach(t *transaction.Transaction) {}
 
 func (r *DummyRunner) RunAfter(t *transaction.Transaction) {}
+
+func (r *DummyRunner) Close() {}

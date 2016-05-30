@@ -17,7 +17,7 @@ const (
 
 // Server is responsible for starting a server and running lifecycle callbacks.
 type Server struct {
-	Runner           Runner
+	Runner           []Runner
 	Port             string
 	MessageDelimeter []byte
 	conn             net.Conn
@@ -25,9 +25,9 @@ type Server struct {
 
 // NewServer returns a new server instance with the supplied runner. If no
 // runner is supplied, a new one will be created.
-func NewServer(runner Runner) *Server {
+func NewServer(runners []Runner) *Server {
 	return &Server{
-		Runner:           runner,
+		Runner:           runners,
 		Port:             defaultPort,
 		MessageDelimeter: []byte(defaultMessageDelimiter),
 	}
@@ -46,7 +46,9 @@ func (server *Server) Run() error {
 		return err
 	}
 
+	defer ln.Close()
 	defer conn.Close()
+	defer server.CloseRunnerConnections()
 	server.conn = conn
 
 	for {
@@ -73,6 +75,12 @@ func (server *Server) Run() error {
 	}
 }
 
+func (server *Server) CloseRunnerConnections() {
+	// for _, runner := range server.Runner {
+	// 	// runner.Close()
+	// }
+}
+
 // ProcessMessage handles a single event message.
 func (server *Server) ProcessMessage(m *message) error {
 	switch m.Event {
@@ -94,27 +102,35 @@ func (server *Server) ProcessMessage(m *message) error {
 
 	switch m.Event {
 	case "beforeAll":
-		server.Runner.RunBeforeAll(m.transactions)
+		server.RunBeforeAll(m.transactions)
+		// server.Runner.RunBeforeAll(m.transactions)
 		break
 	case "beforeEach":
 		// before is run after beforeEach, as no separate event is fired.
-		server.Runner.RunBeforeEach(m.transaction)
-		server.Runner.RunBefore(m.transaction)
+		server.RunBeforeEach(m.transaction)
+		server.RunBefore(m.transaction)
+		// server.Runner.RunBeforeEach(m.transaction)
+		// server.Runner.RunBefore(m.transaction)
 		break
 	// TODO: Do not seem to be receiving this event
 	case "beforeEachValidation":
 		// beforeValidation is run after beforeEachValidation, as no separate event
 		// is fired.
-		server.Runner.RunBeforeEachValidation(m.transaction)
-		server.Runner.RunBeforeValidation(m.transaction)
+		server.RunBeforeEachValidation(m.transaction)
+		server.RunBeforeValidation(m.transaction)
+		// server.Runner.RunBeforeEachValidation(m.transaction)
+		// server.Runner.RunBeforeValidation(m.transaction)
 		break
 	case "afterEach":
 		// after is run before afterEach as no separate event is fired.
-		server.Runner.RunAfter(m.transaction)
-		server.Runner.RunAfterEach(m.transaction)
+		server.RunAfterEach(m.transaction)
+		server.RunAfter(m.transaction)
+		// server.Runner.RunAfter(m.transaction)
+		// server.Runner.RunAfterEach(m.transaction)
 		break
 	case "afterAll":
-		server.Runner.RunAfterAll(m.transactions)
+		server.RunAfterAll(m.transactions)
+		// server.Runner.RunAfterAll(m.transactions)
 		break
 	default:
 		return fmt.Errorf("Unknown event '%s'", m.Event)
@@ -127,6 +143,55 @@ func (server *Server) ProcessMessage(m *message) error {
 		return server.sendResponse(m, m.transactions)
 	default:
 		return server.sendResponse(m, m.transaction)
+	}
+}
+
+func (server *Server) RunBeforeAll(trans []*t.Transaction) {
+	for _, runner := range server.Runner {
+		runner.RunBeforeAll(trans)
+	}
+}
+
+func (server *Server) RunBeforeEach(trans *t.Transaction) {
+	for _, runner := range server.Runner {
+		runner.RunBeforeEach(trans)
+	}
+}
+
+func (server *Server) RunBefore(trans *t.Transaction) {
+	for _, runner := range server.Runner {
+		runner.RunBefore(trans)
+	}
+}
+
+func (server *Server) RunBeforeEachValidation(trans *t.Transaction) {
+	for _, runner := range server.Runner {
+		runner.RunBeforeEachValidation(trans)
+	}
+}
+
+func (server *Server) RunBeforeValidation(trans *t.Transaction) {
+	for _, runner := range server.Runner {
+		runner.RunBeforeValidation(trans)
+	}
+}
+
+func (server *Server) RunAfterEach(trans *t.Transaction) {
+	for _, runner := range server.Runner {
+		runner.RunAfterEach(trans)
+	}
+}
+
+func (server *Server) RunAfter(trans *t.Transaction) {
+	for _, runner := range server.Runner {
+		runner.RunAfter(trans)
+	}
+}
+
+func (server *Server) RunAfterAll(trans []*t.Transaction) {
+	fmt.Printf("%#v with length %d", server.Runner, len(server.Runner))
+	for _, runner := range server.Runner {
+		runner.RunAfterAll(trans)
 	}
 }
 
