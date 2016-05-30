@@ -1,10 +1,10 @@
-language: ruby
+language: go
 
 install:
-  - npm install -g dredd
-  - cd cucumber
+  - npm install
   - bundle install
 
+go_import_path: github.com/ddelnano/goodman
 script:
-  - cd cucumber
+  - go test github.com/ddelnano/goodman/{,/transaction,/hooks}
   - bundle exec cucumber
