@@ -5,6 +5,4 @@
 
 - Glob file path for hooks
 
-- child processes still don't die
-
 - Multiple hooks, port should be passed in via cli flag
