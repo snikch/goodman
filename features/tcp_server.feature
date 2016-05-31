@@ -1,12 +1,14 @@
 Feature: TCP server and messages
+  Background:
+    When I run `go build -o bin/dredd-hooks-go github.com/snikch/goodman/bin`
 
 Scenario: TCP server
-  When I run `dredd-hooks-go` interactively
+  When I run `bin/dredd-hooks-go` interactively
   And I wait for output to contain "Starting"
   Then It should start listening on localhost port "61321"
 
 Scenario: Message exchange for event beforeEach
-  Given I run `dredd-hooks-go` interactively
+  Given I run `bin/dredd-hooks-go` interactively
   When I wait for output to contain "Starting"
   And I connect to the server
   And I send a JSON message to the socket:
@@ -18,7 +20,7 @@ Scenario: Message exchange for event beforeEach
   And I should be able to gracefully disconnect
 
 Scenario: Message exchange for event beforeEachValidation
-  Given I run `dredd-hooks-go` interactively
+  Given I run `bin/dredd-hooks-go` interactively
   When I wait for output to contain "Starting"
   And I connect to the server
   And I send a JSON message to the socket:
@@ -30,7 +32,7 @@ Scenario: Message exchange for event beforeEachValidation
   And I should be able to gracefully disconnect
 
 Scenario: Message exchange for event afterEach
-  Given I run `dredd-hooks-go` interactively
+  Given I run `bin/dredd-hooks-go` interactively
   When I wait for output to contain "Starting"
   And I connect to the server
   And I send a JSON message to the socket:
@@ -42,7 +44,7 @@ Scenario: Message exchange for event afterEach
   And I should be able to gracefully disconnect
 
 Scenario: Message exchange for event beforeAll
-  Given I run `dredd-hooks-go` interactively
+  Given I run `bin/dredd-hooks-go` interactively
   When I wait for output to contain "Starting"
   And I connect to the server
   And I send a JSON message to the socket:
@@ -54,7 +56,7 @@ Scenario: Message exchange for event beforeAll
   And I should be able to gracefully disconnect
 
 Scenario: Message exchange for event afterAll
-  Given I run `dredd-hooks-go` interactively
+  Given I run `bin/dredd-hooks-go` interactively
   When I wait for output to contain "Starting"
   And I connect to the server
   And I send a JSON message to the socket:
