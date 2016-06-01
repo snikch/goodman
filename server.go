@@ -180,7 +180,6 @@ func (server *Server) RunAfter(trans *t.Transaction) {
 }
 
 func (server *Server) RunAfterAll(trans []*t.Transaction) {
-	fmt.Printf("%#v with length %d", server.Runner, len(server.Runner))
 	for _, runner := range server.Runner {
 		runner.RunAfterAll(trans)
 	}
