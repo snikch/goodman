@@ -1,4 +1,4 @@
-# Goodman [![Godoc Reference](http://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/snikch/goodman)
+# Goodman [![Godoc Reference](http://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/snikch/goodman) ![Travis Status](https://travis-ci.org/snikch/goodman.svg?branch=master)
 
 Goodman is a [Dredd](https://github.com/apiaryio/dredd) hook handler implementation in Go. The API may change, please Vendor this library.
 
