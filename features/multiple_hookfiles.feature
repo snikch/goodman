@@ -2,7 +2,7 @@ Feature: Multiple hook files with a glob
 
   Background:
     Given I have "go" command installed
-    When I run `go build -o bin/dredd-hooks-go github.com/snikch/goodman/bin`
+    When I run `go build -o bin/goodman github.com/snikch/goodman/cmd/goodman`
     And I have "dredd" command installed
     And a file named "server.rb" with:
       """
@@ -90,7 +90,7 @@ Feature: Multiple hook files with a glob
       }
       """
     # When I run `go build -o hook_file_to_be_globed github.com/snikch/goodman/tmp/aruba`
-    When I run `dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language bin/dredd-hooks-go --hookfiles ./1/hookfile1 --hookfiles ./2/hookfile2`
+    When I run `dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language bin/goodman --hookfiles ./1/hookfile1 --hookfiles ./2/hookfile2`
     Then the exit status should be 0
     And the output should contain:
       """

@@ -2,7 +2,7 @@ Feature: Failing a transaction
 
   Background:
     Given I have "go" command installed
-    When I run `go build -o bin/dredd-hooks-go github.com/snikch/goodman/bin`
+    When I run `go build -o bin/goodman github.com/snikch/goodman/cmd/goodman`
     And I have "dredd" command installed
     And a file named "server.rb" with:
       """
@@ -44,7 +44,7 @@ Feature: Failing a transaction
         }
       """
     When I run `go build -o aruba github.com/snikch/goodman/tmp/aruba`
-    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language bin/dredd-hooks-go --hookfiles ./aruba`
+    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language bin/goodman --hookfiles ./aruba`
     Then the exit status should be 1
     And the output should contain:
       """
