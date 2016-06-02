@@ -2,59 +2,90 @@
 
 Goodman is a [Dredd](https://github.com/apiaryio/dredd) hook handler implementation in Go. The API may change, please Vendor this library.
 
-## Usage
+##About
+This package contains a Go Dredd hook handler which provides a bridge between the [Dredd API Testing Framework](http://dredd.readthedocs.org/en/latest/)
+ and Go environment to ease implementation of testing hooks provided by [Dredd](http://dredd.readthedocs.org/en/latest/). Write Dredd hooks in Go to glue together [API Blueprint](https://apiblueprint.org/) with your Go project
 
-Write your own goodman server, and run it as the `--language` argument to Dredd. Note, you'll need to supply an arbitrary `--hookfiles` param, this is required, but the binary supplied to `--language` is the important argument.
+Not sure what these Dredd Hooks are?  Read the Dredd documentation on [them](http://dredd.readthedocs.org/en/latest/hooks/)
 
+The following are a few examples of what hooks can be used for:
+
+- loading db fixtures
+- cleanup after test step or steps
+- handling authentication and sessions
+- passing data between transactions (saving state from responses to stash)
+- modifying request generated from blueprint
+- changing generated expectations
+- setting custom expectations
+- debugging via logging stuff
+
+
+##Installing
+
+```bash
+go get github.com/snikch/goodman
+go build -o $GOPATH/bin/goodman github.com/snikch/goodman/cmd/goodman
 ```
- dredd ./blueprint.apib http://localhost:4567 --server "./my-server" --language ./go-hook-server --hookfiles *.rb
- ```
 
-Here is an example usage from the test `cucumber/execution_order.feature`, which consumes all the available callbacks. For more information on the `Transaction` object, see [`transaction.go`](https://github.com/snikch/goodman/blob/master/transaction.go).
+##Usage
+
+1. Create a hook file in `hooks.go`
 
 ```go
 package main
 
 import (
-	"fmt"
-	"log"
+  "fmt"
 
-	"github.com/snikch/goodman"
+  "github.com/snikch/goodman/hooks"
+  trans "github.com/snikch/goodman/transaction"
 )
 
 func main() {
-	fmt.Println("Starting")
-	server := goodman.NewServer(NewRunner())
-	log.Fatal(server.Run())
-}
+      h := hooks.NewHooks()
+      server := hooks.NewServer(h)
+      h.Before("/message > GET", func(t *trans.Transaction) {
+          fmt.Println("before modification")
+      })
+      server.Serve()
+      defer server.Listener.Close()
+})
 
-// NewTestRunner creates a runner
-func NewRunner() *goodman.Runner {
-	runner := goodman.NewRunner()
-	runner.BeforeAll(func(t []*goodman.Transaction) {
-		t[0].AddTestOrderPoint("before all modification")
-	})
-	runner.BeforeEach(func(t *goodman.Transaction) {
-		t.AddTestOrderPoint("before each modification")
-	})
-	runner.Before("/message > GET", func(t *goodman.Transaction) {
-		t.AddTestOrderPoint("before modification")
-	})
-	runner.BeforeEachValidation(func(t *goodman.Transaction) {
-		t.AddTestOrderPoint("before each validation modification")
-	})
-	runner.BeforeValidation("/message > GET", func(t *goodman.Transaction) {
-		t.AddTestOrderPoint("before validation modification")
-	})
-	runner.After("/message > GET", func(t *goodman.Transaction) {
-		t.AddTestOrderPoint("after modification")
-	})
-	runner.AfterEach(func(t *goodman.Transaction) {
-		t.AddTestOrderPoint("after each modification")
-	})
-	runner.AfterAll(func(t []*goodman.Transaction) {
-		t[0].AddTestOrderPoint("after all modification")
-	})
-	return runner
-}
 ```
+
+2. Compile your hooks program
+
+```bash
+go build -o hooks path/to/hooks.go
+```
+
+2. Run it with dredd
+
+`dredd apiary.apib localhost:3000 --language go --hookfiles ./hooks`
+
+##API
+
+The `Dredd\Hooks` class provides the following methods `before`, `after`, `before_all`, `after_all`, `before_each`, `after_each`, `before_validation`, and `before_each_validation`.
+These methods correspond to the events that Dredd will run as it makes requests to the API endpoints defined in the blueprint/apiary.apib file.
+The `before`, `before_validation` and `after` hooks are identified by [transaction name](http://dredd.readthedocs.org/en/latest/hooks/#getting-transaction-names)
+
+##How to Contribute
+
+1. Fork it
+2. Create your feature branch (git checkout -b my-newfeature)
+3. Commit your changes (git commit -am 'Add some feature')
+4. Push (git push origin my-new-feature)
+5. Create a new Pull Request
+
+##Tests
+
+The test suite consists of go test suite and aruba/cucumber tests
+
+Running the tests
+
+- go tests `go test github.com/snikch/{,/hooks,/transaction}`
+
+- aruba tests
+  - Install local dredd copy `npm install`
+  - Install aruba ruby gem `bundle install`
+  - Run test suite `bundle exec cucumber`
