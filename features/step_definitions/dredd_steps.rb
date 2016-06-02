@@ -40,7 +40,3 @@ end
 Then(/^I should be able to gracefully disconnect$/) do
   @client.close
 end
-
-Given(/^I compile to "(.*)"$/) do | outfile|
-  Kernel.system "go build -o #{outfile}"
-end

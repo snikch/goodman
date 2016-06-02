@@ -19,8 +19,10 @@ _cgo_export.*
 
 _testmain.go
 
+cmd/goodman/goodman
 *.exe
 *.test
 *.prof
-cucumber/tmp/
-cucumber/hookfile-go
+
+node_modules/
+tmp/
