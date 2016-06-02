@@ -29,7 +29,7 @@ go build -o $GOPATH/bin/goodman github.com/snikch/goodman/cmd/goodman
 
 ##Usage
 
-1. Create a hook file in `hooks.go`
+1). Create a hook file in `hooks.go`
 
 ```go
 package main
@@ -53,13 +53,13 @@ func main() {
 
 ```
 
-2. Compile your hooks program
+2). Compile your hooks program
 
 ```bash
 go build -o hooks path/to/hooks.go
 ```
 
-3. Run it with dredd
+3). Run it with dredd
 
 `dredd apiary.apib localhost:3000 --language go --hookfiles ./hooks`
 
