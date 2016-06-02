@@ -23,8 +23,7 @@ func main() {
 	args := os.Args
 	hookPaths := args[1:len(args)]
 	c = make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		closeHooksServers()
