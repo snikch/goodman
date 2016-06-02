@@ -12,11 +12,13 @@ import (
 	"github.com/snikch/goodman"
 )
 
-var c chan os.Signal
-var cmds chan *exec.Cmd
-var runners []goodman.Runner
-var hookServerInitalPort = 61322
-var hooksServerCount int
+var (
+	c                    chan os.Signal
+	cmds                 chan *exec.Cmd
+	runners              []goodman.Runner
+	hookServerInitalPort = 61322
+	hooksServerCount     int
+)
 
 func main() {
 	cmds = make(chan *exec.Cmd, 50)
