@@ -22,10 +22,6 @@ _testmain.go
 *.exe
 *.test
 *.prof
-cucumber/tmp/
-cucumber/hookfile-go
 
-goodman
 node_modules/
 tmp/
-bin/dredd-hooks-go
