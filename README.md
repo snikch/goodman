@@ -59,15 +59,14 @@ func main() {
 go build -o hooks path/to/hooks.go
 ```
 
-2. Run it with dredd
+3. Run it with dredd
 
 `dredd apiary.apib localhost:3000 --language go --hookfiles ./hooks`
 
 ##API
 
-The `Dredd\Hooks` class provides the following methods `before`, `after`, `before_all`, `after_all`, `before_each`, `after_each`, `before_validation`, and `before_each_validation`.
-These methods correspond to the events that Dredd will run as it makes requests to the API endpoints defined in the blueprint/apiary.apib file.
-The `before`, `before_validation` and `after` hooks are identified by [transaction name](http://dredd.readthedocs.org/en/latest/hooks/#getting-transaction-names)
+The `hooks.Server` struct provides the following methods to hook into the following dredd transactions: `before`, `after`, `before_all`, `after_all`, `before_each`, `after_each`, `before_validation`, and `before_each_validation`.
+The `before`, `before_validation` and `after` hooks are identified by [transaction name](http://dredd.readthedocs.org/en/latest/hooks/#getting-transaction-names).
 
 ##How to Contribute
 
