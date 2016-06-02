@@ -48,7 +48,6 @@ func (server *Server) Run() error {
 
 	defer ln.Close()
 	defer conn.Close()
-	defer server.CloseRunnerConnections()
 	server.conn = conn
 
 	for {
@@ -73,12 +72,6 @@ func (server *Server) Run() error {
 			return err
 		}
 	}
-}
-
-func (server *Server) CloseRunnerConnections() {
-	// for _, runner := range server.Runner {
-	// 	// runner.Close()
-	// }
 }
 
 // ProcessMessage handles a single event message.
