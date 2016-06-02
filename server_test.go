@@ -20,7 +20,6 @@ func TestSendingServerMessages(t *testing.T) {
 	messages := []struct {
 		Payload []byte
 	}{
-		// TODO: Figure why I could not use `` quoted string
 		{
 			Payload: []byte("{\"uuid\":\"1234-abcd\",\"event\":\"beforeEach\",\"data\":{}}\n"),
 		},
