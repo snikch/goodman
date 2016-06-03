@@ -36,7 +36,7 @@ func NewHooks() *Hooks {
 }
 
 func (h *Hooks) RunBeforeAll(args []*trans.Transaction, reply *[]*trans.Transaction) error {
-	reply = &args
+	*reply = args
 	for _, cb := range h.beforeAll {
 		cb(args)
 	}
@@ -44,7 +44,7 @@ func (h *Hooks) RunBeforeAll(args []*trans.Transaction, reply *[]*trans.Transact
 }
 
 func (h *Hooks) RunBeforeEach(args trans.Transaction, reply *trans.Transaction) error {
-	reply = &args
+	*reply = args
 	for _, cb := range h.beforeEach {
 		cb(reply)
 	}
@@ -52,7 +52,7 @@ func (h *Hooks) RunBeforeEach(args trans.Transaction, reply *trans.Transaction) 
 }
 func (h *Hooks) RunBefore(args trans.Transaction, reply *trans.Transaction) error {
 	name := args.Name
-	reply = &args
+	*reply = args
 	for _, cb := range h.before[name] {
 		cb(reply)
 	}
@@ -60,7 +60,7 @@ func (h *Hooks) RunBefore(args trans.Transaction, reply *trans.Transaction) erro
 }
 
 func (h *Hooks) RunBeforeEachValidation(args trans.Transaction, reply *trans.Transaction) error {
-	reply = &args
+	*reply = args
 	for _, cb := range h.beforeEachValidation {
 		cb(reply)
 	}
@@ -68,7 +68,7 @@ func (h *Hooks) RunBeforeEachValidation(args trans.Transaction, reply *trans.Tra
 }
 func (h *Hooks) RunBeforeValidation(args trans.Transaction, reply *trans.Transaction) error {
 	name := args.Name
-	reply = &args
+	*reply = args
 	for _, cb := range h.beforeValidation[name] {
 		cb(reply)
 	}
@@ -77,7 +77,7 @@ func (h *Hooks) RunBeforeValidation(args trans.Transaction, reply *trans.Transac
 
 func (h *Hooks) RunAfter(args trans.Transaction, reply *trans.Transaction) error {
 	name := args.Name
-	reply = &args
+	*reply = args
 	for _, cb := range h.after[name] {
 		cb(reply)
 	}
@@ -85,7 +85,7 @@ func (h *Hooks) RunAfter(args trans.Transaction, reply *trans.Transaction) error
 }
 
 func (h *Hooks) RunAfterEach(args trans.Transaction, reply *trans.Transaction) error {
-	reply = &args
+	*reply = args
 	for _, cb := range h.afterEach {
 		cb(reply)
 	}
@@ -93,7 +93,7 @@ func (h *Hooks) RunAfterEach(args trans.Transaction, reply *trans.Transaction) e
 }
 
 func (h *Hooks) RunAfterAll(args []*trans.Transaction, reply *[]*trans.Transaction) error {
-	reply = &args
+	*reply = args
 	for _, cb := range h.afterAll {
 		cb(args)
 	}

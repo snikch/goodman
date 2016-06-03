@@ -28,8 +28,6 @@ Feature: Execution order
     """
     package main
     import (
-      "fmt"
-
       "github.com/snikch/goodman/hooks"
       trans "github.com/snikch/goodman/transaction"
     )
@@ -38,32 +36,60 @@ Feature: Execution order
         h := hooks.NewHooks()
         server := hooks.NewServer(h)
         h.BeforeAll(func(t []*trans.Transaction) {
-          fmt.Printf("%#v", t)
-          fmt.Println("before all modification")
+            if t[0].TestOrder == nil {
+                t[0].TestOrder = []string{"before all modification"}
+                } else {
+                    t[0].TestOrder = append(t[0].TestOrder, "before all modification")
+                }
         })
         h.BeforeEach(func(t *trans.Transaction) {
-          fmt.Printf("%#v", t)
-          fmt.Println("before each modification")
+            if t.TestOrder == nil {
+                t.TestOrder = []string{"before each modification"}
+                } else {
+                    t.TestOrder = append(t.TestOrder, "before each modification")
+                }
         })
         h.Before("/message > GET", func(t *trans.Transaction) {
-          fmt.Printf("%#v", t)
-          fmt.Println("before modification")
+            if t.TestOrder == nil {
+                t.TestOrder = []string{"before modification"}
+                } else {
+                    t.TestOrder = append(t.TestOrder, "before modification")
+                }
         })
         h.BeforeEachValidation(func(t *trans.Transaction) {
-          fmt.Printf("%#v", t)
-          fmt.Println("before each validation modification")
+            if t.TestOrder == nil {
+                t.TestOrder = []string{"before each validation modification"}
+                } else {
+                    t.TestOrder = append(t.TestOrder, "before each validation modification")
+                }
         })
         h.BeforeValidation("/message > GET", func(t *trans.Transaction) {
-          fmt.Println("before validation modification")
+            if t.TestOrder == nil {
+                t.TestOrder = []string{"before validation modification"}
+                } else {
+                    t.TestOrder = append(t.TestOrder, "before validation modification")
+                }
         })
         h.After("/message > GET", func(t *trans.Transaction) {
-          fmt.Println("after modification")
+            if t.TestOrder == nil {
+                t.TestOrder = []string{"after modification"}
+                } else {
+                    t.TestOrder = append(t.TestOrder, "after modification")
+                }
         })
         h.AfterEach(func(t *trans.Transaction) {
-          fmt.Println("after each modification")
+            if t.TestOrder == nil {
+                t.TestOrder = []string{"after each modification"}
+                } else {
+                    t.TestOrder = append(t.TestOrder, "after each modification")
+                }
         })
         h.AfterAll(func(t []*trans.Transaction) {
-          fmt.Println("after all modification")
+            if t[0].TestOrder == nil {
+                t[0].TestOrder = []string{"after all modification"}
+                } else {
+                    t[0].TestOrder = append(t[0].TestOrder, "after all modification")
+                }
         })
 
         server.Serve()

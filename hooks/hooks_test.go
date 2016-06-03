@@ -45,6 +45,7 @@ func TestRunnerImplementation(t *testing.T) {
 	}
 	var hooks RunnerRPC
 	var invoked bool
+	reply := []*trans.Transaction{}
 	cbs := []Callback{
 		func(ts *trans.Transaction) {
 			invoked = true
@@ -60,7 +61,7 @@ func TestRunnerImplementation(t *testing.T) {
 			hooks = &Hooks{
 				beforeAll: allCbs,
 			}
-			hooks.RunBeforeAll([]*trans.Transaction{&tss}, nil)
+			hooks.RunBeforeAll([]*trans.Transaction{&tss}, &reply)
 		},
 		func() {
 			hooks = &Hooks{
@@ -111,7 +112,7 @@ func TestRunnerImplementation(t *testing.T) {
 			hooks = &Hooks{
 				afterAll: allCbs,
 			}
-			hooks.RunAfterAll([]*trans.Transaction{&tss}, nil)
+			hooks.RunAfterAll([]*trans.Transaction{&tss}, &reply)
 		},
 	}
 	for _, hookFn := range fns {

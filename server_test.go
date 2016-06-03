@@ -37,7 +37,21 @@ func TestSendingServerMessages(t *testing.T) {
 		},
 	}
 
-	conn, err := net.Dial("tcp", "localhost:61321")
+	var (
+		conn net.Conn
+		err  error
+	)
+
+	for {
+		// If server does not fail to start client should be able to connect.
+		// This is to prevent test from failing due to syncronization between
+		// server starting in go routine and client trying to connect.  This
+		// is a test, should probably pass a channel to server.Run instead.
+		conn, err = net.Dial("tcp", "localhost:61321")
+		if err == nil {
+			break
+		}
+	}
 
 	if err != nil {
 		t.Fatalf("Client connection to dredd hooks server failed")

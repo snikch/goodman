@@ -24,13 +24,14 @@ type Run struct {
 	rpcService string
 }
 
-func (r *Run) RunBeforeAll(t []*transaction.Transaction) {
+func (r *Run) RunBeforeAll(t *[]*transaction.Transaction) {
 	var reply []*transaction.Transaction
 	err := r.client.Call(r.rpcService+".RunBeforeAll", t, &reply)
 
 	if err != nil {
 		panic("RPC client threw error " + err.Error())
 	}
+	*t = reply
 }
 
 func (r *Run) RunBeforeEach(t *transaction.Transaction) {
@@ -40,6 +41,7 @@ func (r *Run) RunBeforeEach(t *transaction.Transaction) {
 	if err != nil {
 		panic("RPC client threw error " + err.Error())
 	}
+	*t = reply
 }
 
 func (r *Run) RunBefore(t *transaction.Transaction) {
@@ -49,6 +51,7 @@ func (r *Run) RunBefore(t *transaction.Transaction) {
 	if err != nil {
 		panic("RPC client threw error " + err.Error())
 	}
+	*t = reply
 }
 
 func (r *Run) RunBeforeEachValidation(t *transaction.Transaction) {
@@ -58,6 +61,7 @@ func (r *Run) RunBeforeEachValidation(t *transaction.Transaction) {
 	if err != nil {
 		panic("RPC client threw error " + err.Error())
 	}
+	*t = reply
 }
 
 func (r *Run) RunBeforeValidation(t *transaction.Transaction) {
@@ -67,15 +71,17 @@ func (r *Run) RunBeforeValidation(t *transaction.Transaction) {
 	if err != nil {
 		panic("RPC client threw error " + err.Error())
 	}
+	*t = reply
 }
 
-func (r *Run) RunAfterAll(t []*transaction.Transaction) {
+func (r *Run) RunAfterAll(t *[]*transaction.Transaction) {
 	var reply []*transaction.Transaction
 	err := r.client.Call(r.rpcService+".RunAfterAll", t, &reply)
 
 	if err != nil {
 		panic("RPC client threw error " + err.Error())
 	}
+	*t = reply
 }
 
 func (r *Run) RunAfterEach(t *transaction.Transaction) {
@@ -85,6 +91,7 @@ func (r *Run) RunAfterEach(t *transaction.Transaction) {
 	if err != nil {
 		panic("RPC client threw error " + err.Error())
 	}
+	*t = reply
 }
 
 func (r *Run) RunAfter(t *transaction.Transaction) {
@@ -94,6 +101,7 @@ func (r *Run) RunAfter(t *transaction.Transaction) {
 	if err != nil {
 		panic("RPC client threw error " + err.Error())
 	}
+	*t = reply
 }
 
 func (r *Run) Close() {
@@ -103,12 +111,12 @@ func (r *Run) Close() {
 }
 
 type Runner interface {
-	RunBeforeAll(t []*transaction.Transaction)
+	RunBeforeAll(t *[]*transaction.Transaction)
 	RunBeforeEach(t *transaction.Transaction)
 	RunBefore(t *transaction.Transaction)
 	RunBeforeEachValidation(t *transaction.Transaction)
 	RunBeforeValidation(t *transaction.Transaction)
-	RunAfterAll(t []*transaction.Transaction)
+	RunAfterAll(t *[]*transaction.Transaction)
 	RunAfterEach(t *transaction.Transaction)
 	RunAfter(t *transaction.Transaction)
 	Close()
@@ -116,7 +124,7 @@ type Runner interface {
 
 type DummyRunner struct{}
 
-func (r *DummyRunner) RunBeforeAll(t []*transaction.Transaction) {}
+func (r *DummyRunner) RunBeforeAll(t *[]*transaction.Transaction) {}
 
 func (r *DummyRunner) RunBeforeEach(t *transaction.Transaction) {}
 
@@ -126,7 +134,7 @@ func (r *DummyRunner) RunBeforeEachValidation(t *transaction.Transaction) {}
 
 func (r *DummyRunner) RunBeforeValidation(t *transaction.Transaction) {}
 
-func (r *DummyRunner) RunAfterAll(t []*transaction.Transaction) {}
+func (r *DummyRunner) RunAfterAll(t *[]*transaction.Transaction) {}
 
 func (r *DummyRunner) RunAfterEach(t *transaction.Transaction) {}
 

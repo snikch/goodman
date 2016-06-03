@@ -16,6 +16,8 @@ Feature: Failing a transaction
       """
       # My Api
       ## GET /message
+      + Request (text)
+        This prevents dredd bug
       + Response 200 (text/html;charset=utf-8)
           Hello World!
       """
@@ -26,8 +28,6 @@ Feature: Failing a transaction
       """
       package main
       import (
-        "fmt"
-
         "github.com/snikch/goodman/hooks"
         trans "github.com/snikch/goodman/transaction"
       )
@@ -37,7 +37,6 @@ Feature: Failing a transaction
           server := hooks.NewServer(h)
           h.Before("/message > GET", func(t *trans.Transaction) {
               t.Fail = "Yay! Failed!"
-              fmt.Println("Yay! Failed!")
           })
           server.Serve()
           defer server.Listener.Close()
