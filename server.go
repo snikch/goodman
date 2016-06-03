@@ -95,7 +95,7 @@ func (server *Server) ProcessMessage(m *message) error {
 
 	switch m.Event {
 	case "beforeAll":
-		server.RunBeforeAll(m.transactions)
+		server.RunBeforeAll(&m.transactions)
 		break
 	case "beforeEach":
 		// before is run after beforeEach, as no separate event is fired.
@@ -110,11 +110,11 @@ func (server *Server) ProcessMessage(m *message) error {
 		break
 	case "afterEach":
 		// after is run before afterEach as no separate event is fired.
-		server.RunAfterEach(m.transaction)
 		server.RunAfter(m.transaction)
+		server.RunAfterEach(m.transaction)
 		break
 	case "afterAll":
-		server.RunAfterAll(m.transactions)
+		server.RunAfterAll(&m.transactions)
 		break
 	default:
 		return fmt.Errorf("Unknown event '%s'", m.Event)
@@ -130,7 +130,7 @@ func (server *Server) ProcessMessage(m *message) error {
 	}
 }
 
-func (server *Server) RunBeforeAll(trans []*t.Transaction) {
+func (server *Server) RunBeforeAll(trans *[]*t.Transaction) {
 	for _, runner := range server.Runner {
 		runner.RunBeforeAll(trans)
 	}
@@ -172,7 +172,7 @@ func (server *Server) RunAfter(trans *t.Transaction) {
 	}
 }
 
-func (server *Server) RunAfterAll(trans []*t.Transaction) {
+func (server *Server) RunAfterAll(trans *[]*t.Transaction) {
 	for _, runner := range server.Runner {
 		runner.RunAfterAll(trans)
 	}
