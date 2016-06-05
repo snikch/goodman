@@ -1,3 +1,5 @@
 *.db
 server
 hooks/hooks
+!vendor/vendor.json
+vendor/*
