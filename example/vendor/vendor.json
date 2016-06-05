@@ -1,0 +1,19 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "Mb+NfGb/UUnxP9KrMFWJjuVULVs=",
+			"path": "github.com/snikch/goodman/hooks",
+			"revision": "7213c8a4b0cefc6ee046f3820256aaa197dcd26c",
+			"revisionTime": "2016-06-03T13:03:46Z"
+		},
+		{
+			"checksumSHA1": "ktzdIvtDXOMIEShtXl09//4j0JM=",
+			"path": "github.com/snikch/goodman/transaction",
+			"revision": "7213c8a4b0cefc6ee046f3820256aaa197dcd26c",
+			"revisionTime": "2016-06-03T13:03:46Z"
+		}
+	],
+	"rootPath": "github.com/snikch/goodman/example"
+}
