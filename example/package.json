@@ -1,0 +1,22 @@
+{
+  "name": "go-hooks-project",
+  "version": "1.0.0",
+  "description": "This is not the permanent home for these examples.  Eventually they will be moved to a more appropriate place, most likely the https://github.com/snikch/goodman repo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddelnano/dredd-hooks-go-example.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ddelnano/dredd-hooks-go-example/issues"
+  },
+  "homepage": "https://github.com/ddelnano/dredd-hooks-go-example#readme",
+  "devDependencies": {
+    "dredd": "1.1.0-pre.5"
+  }
+}
