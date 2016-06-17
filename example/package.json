@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/ddelnano/dredd-hooks-go-example#readme",
   "devDependencies": {
-    "dredd": "1.1.0-pre.5"
+    "dredd": "^1.1.0"
   }
 }

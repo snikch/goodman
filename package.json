@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/snikch/goodman#readme",
   "devDependencies": {
-    "dredd": "^1.0.11"
+    "dredd": "^1.1.0"
   }
 }
