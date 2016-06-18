@@ -8,3 +8,4 @@ go_import_path: github.com/snikch/goodman
 script:
   - go test github.com/snikch/goodman/{,/transaction,/hooks}
   - bundle exec cucumber
+  - make -C example dredd
