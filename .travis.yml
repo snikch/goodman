@@ -4,6 +4,7 @@ node_js:
   - "5"
 
 install:
+  - nvm use 5.11
   - npm install dredd -g
   - bundle install
 
