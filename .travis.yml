@@ -1,7 +1,7 @@
 language: go
 
 install:
-  - npm install
+  - npm install dredd -g
   - bundle install
 
 go_import_path: github.com/snikch/goodman
