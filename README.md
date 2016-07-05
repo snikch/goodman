@@ -22,6 +22,8 @@ The following are a few examples of what hooks can be used for:
 
 ##Installing
 
+**Must use Dredd v1.1.0 or greater**
+
 ```bash
 go get github.com/snikch/goodman
 go build -o $GOPATH/bin/goodman github.com/snikch/goodman/cmd/goodman

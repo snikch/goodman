@@ -1,10 +1,24 @@
 sudo: required
 dist: trusty
 language: go
+go:
+  - 1.5
+  - 1.6
+
+env:
+  - GO15VENDOREXPERIMENT=1
+
 install:
   - npm install -g dredd
+  - npm install
   - bundle install
+  - go get -u github.com/kardianos/govendor
+  - go install github.com/kardianos/govendor
+  - go build -o $GOPATH/bin/goodman github.com/snikch/goodman/cmd/goodman
+  - cd example && $GOPATH/bin/govendor sync && cd ..
+
 go_import_path: github.com/snikch/goodman
 script:
   - go test github.com/snikch/goodman/{,/transaction,/hooks}
   - bundle exec cucumber
+  - make -C example dredd
