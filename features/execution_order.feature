@@ -101,7 +101,7 @@ Feature: Execution order
       | variable                       | value      |
       | TEST_DREDD_HOOKS_HANDLER_ORDER | true       |
 
-    When I run `../../node_modules/.bin/dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language bin/goodman --hookfiles ./aruba`
+    When I run `dredd ./apiary.apib http://localhost:4567 --server "ruby server.rb" --language bin/goodman --hookfiles ./aruba`
     Then the exit status should be 0
     Then the output should contain:
       """

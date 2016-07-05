@@ -2,7 +2,7 @@ sudo: required
 dist: trusty
 language: go
 install:
-  - npm install
+  - npm install -g dredd
   - bundle install
 go_import_path: github.com/snikch/goodman
 script:
