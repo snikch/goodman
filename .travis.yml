@@ -1,9 +1,9 @@
+sudo: required
+dist: trusty
 language: go
-
 install:
   - npm install
   - bundle install
-
 go_import_path: github.com/snikch/goodman
 script:
   - go test github.com/snikch/goodman/{,/transaction,/hooks}
