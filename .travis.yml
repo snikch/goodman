@@ -1,13 +1,9 @@
+sudo: required
+dist: trusty
 language: go
-
-node_js:
-  - "5"
-
 install:
-  - nvm install 5.11 && nvm use 5.11
-  - npm install dredd -g
+  - npm install -g dredd
   - bundle install
-
 go_import_path: github.com/snikch/goodman
 script:
   - go test github.com/snikch/goodman/{,/transaction,/hooks}
