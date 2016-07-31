@@ -26,3 +26,4 @@ cmd/goodman/goodman
 
 node_modules/
 tmp/
+.idea/
