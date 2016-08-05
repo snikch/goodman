@@ -34,7 +34,7 @@ func TestHeadersJsonUnmarshal(t *testing.T) {
 		t.Errorf("Error %v", err)
 	}
 
-	if len(hdrs.Headers["Set-Cookie"]) != 1 || !reflect.DeepEqual(hdrs.Headers["Set-Cookie"], []string{"Test=Yo"}) {
+	if !reflect.DeepEqual(hdrs.Headers["Set-Cookie"], []string{"Test=Yo"}) {
 		t.Errorf("Set-Cookie should be slice with length of 1")
 	}
 
@@ -44,5 +44,40 @@ func TestHeadersJsonUnmarshal(t *testing.T) {
 
 	if !reflect.DeepEqual(hdrs.Headers["Content-Length"], []string{"11"}) {
 		t.Errorf("Content-Length should be converted to a string and be a slice")
+	}
+}
+
+func TestHeadersMarshalJSON(t *testing.T) {
+	headers := make(map[string][]string)
+	headers["Content-Type"] = []string{"9"}
+	headers["User-Agent"] = []string{"Dredd/1.4.0 (Darwin 15.4.0; x64)"}
+	headers["Set-Cookie"] = []string{"Test=Yo", "Another=This"}
+	wrapper := &HeadersWrapper{
+		Headers: headers,
+	}
+
+	data, err := json.Marshal(wrapper)
+
+	if err != nil {
+		t.Errorf("json.Marshal failed with %v", err)
+	}
+
+	var expected interface{}
+	err = json.Unmarshal([]byte(`{"headers":{"Content-Type":"9","User-Agent":"Dredd/1.4.0 (Darwin 15.4.0; x64)","Set-Cookie":["Test=Yo","Another=This"]}}`), &expected)
+
+	if err != nil {
+		t.Errorf("failed to unmarshal expected json string")
+	}
+
+	var actual interface{}
+	err = json.Unmarshal(data, &actual)
+
+	if err != nil {
+		t.Errorf("failed to unmarshal Marshaled json")
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("json.Marshal failed, data \n %#v did not matched expected \n %#v", actual, expected)
+
 	}
 }
