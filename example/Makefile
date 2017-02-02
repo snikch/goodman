@@ -1,7 +1,7 @@
 .PHONY: dredd
 
 hooks/hooks:
-	cd hooks/; go build; cd ..;
+	cd hooks/; rm -f foo.db; touch foo.db; go build; cd ..;
 
 server:
 	go build -o server
