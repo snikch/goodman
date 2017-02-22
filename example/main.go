@@ -20,12 +20,16 @@ func main() {
 		db, err := sql.Open("sqlite3", "./foo.db")
 		if err != nil {
 			log.Fatal(err)
+			w.WriteHeader(500)
+			return
 		}
 		defer db.Close()
 		rows, err := db.Query(`select id, name, email from users where id = ?;`, 1)
 
 		if err != nil {
-			panic(err)
+			w.WriteHeader(500)
+			w.Write([]byte("Failed!"))
+			return
 		}
 
 		var id int
@@ -46,7 +50,9 @@ func main() {
 		}
 		data, err := json.Marshal(user)
 		if err != nil {
-			panic("Marshaling failed with message " + err.Error())
+			w.WriteHeader(500)
+			w.Write([]byte("Failed!"))
+			return
 		}
 		w.Header().Add("Content-Type", "application/json")
 		w.Write(data)
