@@ -7,7 +7,7 @@ server:
 	go build -o server
 
 dredd: hooks/hooks server
-	../node_modules/.bin/dredd api.apib http://localhost:8080 --language go --server ./server --hookfiles hooks/hooks
+	dredd ./api.apib http://127.0.0.1:8080 --language go --server ./server --hookfiles hooks/hooks --level silly
 
 clean: 
 	rm server hooks/hooks
