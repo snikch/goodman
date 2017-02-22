@@ -28,7 +28,7 @@ func main() {
 
 		if err != nil {
 			w.WriteHeader(500)
-			w.Write("Failed!")
+			w.Write([]byte("Failed!"))
 			return
 		}
 
@@ -51,7 +51,7 @@ func main() {
 		data, err := json.Marshal(user)
 		if err != nil {
 			w.WriteHeader(500)
-			w.Write("Failed!")
+			w.Write([]byte("Failed!"))
 			return
 		}
 		w.Header().Add("Content-Type", "application/json")
