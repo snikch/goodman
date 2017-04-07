@@ -7,16 +7,16 @@ import (
 	"github.com/snikch/goodman/transaction"
 )
 
-func NewRunner(rpcService string, port int) *Run {
+func NewRunner(rpcService string, port int) (*Run, error) {
 	client, err := rpc.DialHTTPPath("tcp", fmt.Sprintf(":%d", port), "/")
 
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 	return &Run{
 		client:     client,
 		rpcService: rpcService,
-	}
+	}, nil
 }
 
 type Run struct {

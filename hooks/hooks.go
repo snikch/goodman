@@ -9,7 +9,7 @@ type (
 	AllCallback func([]*trans.Transaction)
 )
 
-// Runner is responsible for storing and running lifecycle callbacks.
+// Hooks is responsible for storing and running lifecycle callbacks.
 type Hooks struct {
 	beforeAll            []AllCallback
 	beforeEach           []Callback
@@ -21,7 +21,7 @@ type Hooks struct {
 	afterAll             []AllCallback
 }
 
-// NewRunner returns a new Runner instance will all callback fields initialized.
+// NewHooks returns a new Hooks instance will all callback fields initialized.
 func NewHooks() *Hooks {
 	return &Hooks{
 		beforeAll:            []AllCallback{},
