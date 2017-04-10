@@ -182,16 +182,20 @@ func (server *Server) RunAfterAll(trans *[]*t.Transaction) {
 func (server *Server) sendResponse(m *message, dataObj interface{}) error {
 	data, err := json.Marshal(dataObj)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshaling data json: %s", err)
 	}
 
 	m.Data = json.RawMessage(data)
 	response, err := json.Marshal(m)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshaling message json: %s", err)
 	}
-	server.conn.Write(response)
-	server.conn.Write(server.MessageDelimeter)
+	if _, err := server.conn.Write(response); err != nil {
+		return fmt.Errorf("writing error response: %s", err.Error())
+	}
+	if _, err := server.conn.Write(server.MessageDelimeter); err != nil {
+		return fmt.Errorf("writing message delimeter: %s", err.Error())
+	}
 	return nil
 }
 
