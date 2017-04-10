@@ -40,14 +40,15 @@ func (server *Server) Run() error {
 	if err != nil {
 		return err
 	}
+	defer ln.Close()
+
 	fmt.Println("Accepting connection")
 	conn, err := ln.Accept()
 	if err != nil {
 		return err
 	}
-
-	defer ln.Close()
 	defer conn.Close()
+
 	server.conn = conn
 
 	for {
