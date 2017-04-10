@@ -3,23 +3,27 @@ package goodman
 import (
 	"fmt"
 	"net/rpc"
+	"os/exec"
 
 	"github.com/snikch/goodman/transaction"
 )
 
-func NewRunner(rpcService string, port int) *Run {
+func NewRunner(rpcService string, port int, cmd *exec.Cmd) (*Run, error) {
 	client, err := rpc.DialHTTPPath("tcp", fmt.Sprintf(":%d", port), "/")
-
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf("dialing tcp server: %s", err.Error())
 	}
-	return &Run{
+
+	runner := Run{
+		cmd:        cmd,
 		client:     client,
 		rpcService: rpcService,
 	}
+	return &runner, nil
 }
 
 type Run struct {
+	cmd        *exec.Cmd
 	client     *rpc.Client
 	rpcService string
 }
@@ -104,10 +108,20 @@ func (r *Run) RunAfter(t *transaction.Transaction) {
 	*t = reply
 }
 
-func (r *Run) Close() {
-	if err := r.client.Close(); err != nil {
-		panic("RPC client threw error on Close() " + err.Error())
+func (r *Run) Close() (err error) {
+	// Kill the underlying hook binary
+	if cmdErr := r.cmd.Process.Kill(); cmdErr != nil {
+		// What is dead may never die
+		// TODO: this is a pretty bad idea, we should robustly detect if the binary is still running
+		if cmdErr.Error() != "os: process already finished" {
+			err = fmt.Errorf("Killing cmd: %s", cmdErr.Error())
+		}
 	}
+	// terminate our connection listening to it
+	if clientErr := r.client.Close(); clientErr != nil {
+		err = fmt.Errorf("RPC client on Close() " + clientErr.Error())
+	}
+	return err
 }
 
 type Runner interface {
@@ -119,7 +133,7 @@ type Runner interface {
 	RunAfterAll(t *[]*transaction.Transaction)
 	RunAfterEach(t *transaction.Transaction)
 	RunAfter(t *transaction.Transaction)
-	Close()
+	Close() error
 }
 
 type DummyRunner struct{}
@@ -140,4 +154,6 @@ func (r *DummyRunner) RunAfterEach(t *transaction.Transaction) {}
 
 func (r *DummyRunner) RunAfter(t *transaction.Transaction) {}
 
-func (r *DummyRunner) Close() {}
+func (r *DummyRunner) Close() error {
+	return nil
+}
