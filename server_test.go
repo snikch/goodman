@@ -8,7 +8,10 @@ import (
 
 func TestSendingServerMessages(t *testing.T) {
 	runner := DummyRunner{}
-	server := NewServer([]Runner{&runner})
+	server, err := NewServer([]Runner{&runner}, 61321)
+	if err != nil {
+		t.Errorf("starting server: %s", err.Error())
+	}
 
 	go func() {
 		err := server.Run()
@@ -39,7 +42,6 @@ func TestSendingServerMessages(t *testing.T) {
 
 	var (
 		conn net.Conn
-		err  error
 	)
 
 	for {

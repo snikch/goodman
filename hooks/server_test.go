@@ -19,7 +19,10 @@ func TestServerRPC(t *testing.T) {
 	hooksServerPort := 61322
 	var addr = fmt.Sprintf(":%d", hooksServerPort)
 	if os.Getenv("RUN_HOOKS") == "1" {
-		server := NewServer(&run)
+		server, err := NewServerWithPortAndError(&run, hooksServerPort)
+		if err != nil {
+			t.Errorf("creating server: %s", err.Error())
+		}
 		fmt.Println("Running the server")
 		server.Serve()
 		defer server.Listener.Close()
