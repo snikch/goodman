@@ -8,10 +8,14 @@ import (
 
 func TestSendingServerMessages(t *testing.T) {
 	runner := DummyRunner{}
-	server := NewServer([]Runner{&runner})
 
 	go func() {
-		err := server.Run()
+		server, err := NewServer([]Runner{&runner}, 61321)
+
+		if err != nil {
+			t.Errorf("starting server: %s", err.Error())
+		}
+		err = server.Run()
 		if err != nil {
 			t.Fatalf("Dredd hooks server failed to start with error %s", err.Error())
 		}
