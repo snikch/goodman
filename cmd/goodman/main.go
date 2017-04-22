@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -49,9 +50,23 @@ func main() {
 					fmt.Println("Hooks client failed with " + err.Error())
 				}
 			}()
-			// Must sleep so go routine running hooks server has chance to startup
-			time.Sleep(100 * time.Millisecond)
-			runners = append(runners, goodman.NewRunner("Hooks", hookServerInitalPort))
+			for retries := 5; retries > 0; retries-- {
+				runner, err := goodman.NewRunner("Hooks", hookServerInitalPort)
+				if err == nil {
+					runners = append(runners, runner)
+					break
+				}
+				if noerr, ok := err.(*net.OpError); ok {
+					if scerr, ok := noerr.Err.(*os.SyscallError); ok {
+						if scerr.Err == syscall.ECONNREFUSED {
+							// Sleep so go routine running hooks server has chance to startup and retry
+							time.Sleep(100 * time.Millisecond)
+							continue
+						}
+					}
+				}
+				panic(err.Error())
+			}
 			hookServerInitalPort++
 		}
 	}
