@@ -134,13 +134,16 @@ func main() {
 
 	// Bring up a server that will communicate with the main dredd runner
 	// (on the port specified by dredd)
-	server, err := goodman.NewServer(runners, *port)
-	if err != nil {
-		log.Fatalf("creating server: %s", err.Error())
-	}
-
+	var (
+		server *goodman.Server
+	)
 	// Server blocks so run in goroutine
 	go func() {
+		server, err = goodman.NewServer(runners, *port)
+		if err != nil {
+			log.Fatalf("creating server: %s", err.Error())
+		}
+
 		if err := server.Run(); err != nil {
 			errChan <- fmt.Errorf("running server: %s", err.Error())
 		}
@@ -148,17 +151,19 @@ func main() {
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	select {
-	// If the user bails out, attempt to shut down gracefully
-	case <-c:
-		server.Close()
-		closeHookRunners(runners)
-		os.Exit(0)
-	// If something broke, let the user know and bail out
-	case err := <-errChan:
-		server.Close()
-		closeHookRunners(runners)
-		log.Fatalf("encountered an unrecoverable error: %s", err.Error())
-		os.Exit(0)
+	for {
+		select {
+		// If the user bails out, attempt to shut down gracefully
+		case <-c:
+			server.Close()
+			closeHookRunners(runners)
+			os.Exit(0)
+		// If something broke, let the user know and bail out
+		case err := <-errChan:
+			server.Close()
+			closeHookRunners(runners)
+			log.Fatalf("encountered an unrecoverable error: %s", err.Error())
+			os.Exit(0)
+		}
 	}
 }
