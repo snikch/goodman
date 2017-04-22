@@ -28,26 +28,29 @@ type Server struct {
 func NewServer(runners []Runner, port int) (*Server, error) {
 	log.Printf("trying to listen on %d", port)
 	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+
 	if err != nil {
 		return nil, fmt.Errorf("listening on tcp: %s", err.Error())
-	}
-
-	conn, err := ln.Accept()
-	if err != nil {
-		return nil, fmt.Errorf("accepting on tcp: %s", err.Error())
 	}
 
 	server := Server{
 		Runner:           runners,
 		MessageDelimeter: []byte(defaultMessageDelimiter),
 		listener:         ln,
-		conn:             conn,
 	}
 	return &server, nil
 }
 
 // Run starts the server listening for events from dredd.
 func (server *Server) Run() error {
+	fmt.Println("Starting")
+	conn, err := server.listener.Accept()
+	if err != nil {
+		return fmt.Errorf("accepting on tcp: %s", err.Error())
+	}
+
+	server.conn = conn
+
 	for {
 		body, err := bufio.
 			NewReader(server.conn).
@@ -73,8 +76,10 @@ func (s Server) Close() (err error) {
 	if listenerErr := s.listener.Close(); listenerErr != nil {
 		err = fmt.Errorf("closing listener: %s", listenerErr.Error())
 	}
-	if connErr := s.conn.Close(); connErr != nil {
-		err = fmt.Errorf("closing server tcp connection: %s", connErr.Error())
+	if s.conn != nil {
+		if connErr := s.conn.Close(); connErr != nil {
+			err = fmt.Errorf("closing server tcp connection: %s", connErr.Error())
+		}
 	}
 	return err
 }

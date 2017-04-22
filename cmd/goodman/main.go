@@ -134,16 +134,13 @@ func main() {
 
 	// Bring up a server that will communicate with the main dredd runner
 	// (on the port specified by dredd)
-	var (
-		server *goodman.Server
-	)
+	server, err := goodman.NewServer(runners, *port)
+	if err != nil {
+		log.Fatalf("creating server: %s", err.Error())
+	}
+
 	// Server blocks so run in goroutine
 	go func() {
-		server, err = goodman.NewServer(runners, *port)
-		if err != nil {
-			log.Fatalf("creating server: %s", err.Error())
-		}
-
 		if err := server.Run(); err != nil {
 			errChan <- fmt.Errorf("running server: %s", err.Error())
 		}
