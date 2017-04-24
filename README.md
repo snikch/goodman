@@ -2,7 +2,7 @@
 
 Goodman is a [Dredd](https://github.com/apiaryio/dredd) hook handler implementation in Go. The API may change, please Vendor this library.
 
-##About
+## About
 This package contains a Go Dredd hook handler which provides a bridge between the [Dredd API Testing Framework](http://dredd.readthedocs.org/en/latest/)
  and Go environment to ease implementation of testing hooks provided by [Dredd](http://dredd.readthedocs.org/en/latest/). Write Dredd hooks in Go to glue together [API Blueprint](https://apiblueprint.org/) with your Go project
 
@@ -20,7 +20,7 @@ The following are a few examples of what hooks can be used for:
 - debugging via logging stuff
 
 
-##Installing
+## Installing
 
 **Must use Dredd v1.1.0 or greater**
 
@@ -28,7 +28,7 @@ The following are a few examples of what hooks can be used for:
 go get github.com/snikch/goodman/cmd/goodman
 ```
 
-##Usage
+## Usage
 
 1). Create a hook file in `hooks.go`
 
@@ -64,12 +64,12 @@ go build -o hooks path/to/hooks.go
 
 `dredd apiary.apib localhost:3000 --language go --hookfiles ./hooks`
 
-##API
+## API
 
 The `hooks.Server` struct provides the following methods to hook into the following dredd transactions: `before`, `after`, `before_all`, `after_all`, `before_each`, `after_each`, `before_validation`, and `before_each_validation`.
 The `before`, `before_validation` and `after` hooks are identified by [transaction name](http://dredd.readthedocs.org/en/latest/hooks/#getting-transaction-names).
 
-##How to Contribute
+## How to Contribute
 
 1. Fork it
 2. Create your feature branch (git checkout -b my-newfeature)
@@ -77,7 +77,7 @@ The `before`, `before_validation` and `after` hooks are identified by [transacti
 4. Push (git push origin my-new-feature)
 5. Create a new Pull Request
 
-##Tests
+## Tests
 
 The test suite consists of go test suite and aruba/cucumber tests
 
