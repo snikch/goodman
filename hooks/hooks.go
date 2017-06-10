@@ -9,7 +9,7 @@ type (
 	AllCallback func([]*trans.Transaction)
 )
 
-// Hooks is responsible for storing and running lifecycle callbacks.
+// Hooks is responsible for storing lifecycle callbacks.
 type Hooks struct {
 	beforeAll            []AllCallback
 	beforeEach           []Callback
@@ -21,7 +21,7 @@ type Hooks struct {
 	afterAll             []AllCallback
 }
 
-// NewHooks returns a new Hooks instance will all callback fields initialized.
+// NewHooks returns a new Hooks instance with all callback fields initialized.
 func NewHooks() *Hooks {
 	return &Hooks{
 		beforeAll:            []AllCallback{},
@@ -33,71 +33,6 @@ func NewHooks() *Hooks {
 		afterEach:            []Callback{},
 		afterAll:             []AllCallback{},
 	}
-}
-
-func (h *Hooks) RunBeforeAll(args []*trans.Transaction, reply *[]*trans.Transaction) error {
-	*reply = args
-	for _, cb := range h.beforeAll {
-		cb(args)
-	}
-	return nil
-}
-
-func (h *Hooks) RunBeforeEach(args trans.Transaction, reply *trans.Transaction) error {
-	*reply = args
-	for _, cb := range h.beforeEach {
-		cb(reply)
-	}
-	return nil
-}
-func (h *Hooks) RunBefore(args trans.Transaction, reply *trans.Transaction) error {
-	name := args.Name
-	*reply = args
-	for _, cb := range h.before[name] {
-		cb(reply)
-	}
-	return nil
-}
-
-func (h *Hooks) RunBeforeEachValidation(args trans.Transaction, reply *trans.Transaction) error {
-	*reply = args
-	for _, cb := range h.beforeEachValidation {
-		cb(reply)
-	}
-	return nil
-}
-func (h *Hooks) RunBeforeValidation(args trans.Transaction, reply *trans.Transaction) error {
-	name := args.Name
-	*reply = args
-	for _, cb := range h.beforeValidation[name] {
-		cb(reply)
-	}
-	return nil
-}
-
-func (h *Hooks) RunAfter(args trans.Transaction, reply *trans.Transaction) error {
-	name := args.Name
-	*reply = args
-	for _, cb := range h.after[name] {
-		cb(reply)
-	}
-	return nil
-}
-
-func (h *Hooks) RunAfterEach(args trans.Transaction, reply *trans.Transaction) error {
-	*reply = args
-	for _, cb := range h.afterEach {
-		cb(reply)
-	}
-	return nil
-}
-
-func (h *Hooks) RunAfterAll(args []*trans.Transaction, reply *[]*trans.Transaction) error {
-	*reply = args
-	for _, cb := range h.afterAll {
-		cb(args)
-	}
-	return nil
 }
 
 // BeforeAll adds a callback function to be called before the entire test suite.
@@ -147,4 +82,81 @@ func (h *Hooks) AfterEach(fn Callback) {
 // AfterAll adds a callback function to be called before the entire test suite.
 func (h *Hooks) AfterAll(fn AllCallback) {
 	h.afterAll = append(h.afterAll, fn)
+}
+
+// Hooks is responsible for running lifecycle callbacks.
+type HooksRunner struct {
+	hooks *Hooks
+}
+
+// NewHooksRunner returns a new HooksRunner instance with a given hooks structure.
+func NewHooksRunner(h *Hooks) *HooksRunner {
+	return &HooksRunner{
+		hooks: h,
+	}
+}
+
+func (h *HooksRunner) RunBeforeAll(args []*trans.Transaction, reply *[]*trans.Transaction) error {
+	*reply = args
+	for _, cb := range h.hooks.beforeAll {
+		cb(args)
+	}
+	return nil
+}
+
+func (h *HooksRunner) RunBeforeEach(args trans.Transaction, reply *trans.Transaction) error {
+	*reply = args
+	for _, cb := range h.hooks.beforeEach {
+		cb(reply)
+	}
+	return nil
+}
+func (h *HooksRunner) RunBefore(args trans.Transaction, reply *trans.Transaction) error {
+	name := args.Name
+	*reply = args
+	for _, cb := range h.hooks.before[name] {
+		cb(reply)
+	}
+	return nil
+}
+
+func (h *HooksRunner) RunBeforeEachValidation(args trans.Transaction, reply *trans.Transaction) error {
+	*reply = args
+	for _, cb := range h.hooks.beforeEachValidation {
+		cb(reply)
+	}
+	return nil
+}
+func (h *HooksRunner) RunBeforeValidation(args trans.Transaction, reply *trans.Transaction) error {
+	name := args.Name
+	*reply = args
+	for _, cb := range h.hooks.beforeValidation[name] {
+		cb(reply)
+	}
+	return nil
+}
+
+func (h *HooksRunner) RunAfter(args trans.Transaction, reply *trans.Transaction) error {
+	name := args.Name
+	*reply = args
+	for _, cb := range h.hooks.after[name] {
+		cb(reply)
+	}
+	return nil
+}
+
+func (h *HooksRunner) RunAfterEach(args trans.Transaction, reply *trans.Transaction) error {
+	*reply = args
+	for _, cb := range h.hooks.afterEach {
+		cb(reply)
+	}
+	return nil
+}
+
+func (h *HooksRunner) RunAfterAll(args []*trans.Transaction, reply *[]*trans.Transaction) error {
+	*reply = args
+	for _, cb := range h.hooks.afterAll {
+		cb(args)
+	}
+	return nil
 }

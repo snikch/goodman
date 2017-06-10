@@ -34,7 +34,7 @@ Feature: Execution order
 
     func main() {
         h := hooks.NewHooks()
-        server := hooks.NewServer(h)
+        server := hooks.NewServer(hooks.NewHooksRunner(h))
         h.BeforeAll(func(t []*trans.Transaction) {
             if t[0].TestOrder == nil {
                 t[0].TestOrder = []string{"before all modification"}
