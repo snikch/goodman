@@ -8,7 +8,7 @@ Feature: Failing a transaction
       """
       require 'sinatra'
       get '/message' do
-        "Hello World!\n\n"
+        "Hello World!\n"
       end
       """
 

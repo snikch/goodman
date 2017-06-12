@@ -8,7 +8,7 @@ Feature: Multiple hook files with a glob
       """
       require 'sinatra'
       get '/message' do
-        "Hello World!\n\n"
+        "Hello World!\n"
       end
       """
 

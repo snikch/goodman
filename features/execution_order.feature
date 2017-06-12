@@ -8,7 +8,7 @@ Feature: Execution order
       """
       require 'sinatra'
       get '/message' do
-        "Hello World!\n\n"
+        "Hello World!\n"
       end
       """
 
