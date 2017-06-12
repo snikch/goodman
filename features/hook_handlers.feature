@@ -17,9 +17,12 @@ Feature: Hook handlers
       # My Api
       ## GET /message
       + Request (text)
-          test this
+
+              test this
+
       + Response 200 (text/html;charset=utf-8)
-          Hello World!
+
+              Hello World!
       """
 
   @debug

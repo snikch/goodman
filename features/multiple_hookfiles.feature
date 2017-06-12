@@ -17,9 +17,12 @@ Feature: Multiple hook files with a glob
       # My Api
       ## GET /message
       + Request (text)
-          This prevents a dredd bug
+
+              This prevents a dredd bug
+
       + Response 200 (text/html;charset=utf-8)
-          Hello World!
+
+              Hello World!
       """
 
   @debug

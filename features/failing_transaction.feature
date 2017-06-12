@@ -17,9 +17,12 @@ Feature: Failing a transaction
       # My Api
       ## GET /message
       + Request (text)
-        This prevents dredd bug
+
+              This prevents dredd bug
+
       + Response 200 (text/html;charset=utf-8)
-          Hello World!
+
+              Hello World!
       """
 
   @debug
