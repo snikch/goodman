@@ -7,10 +7,12 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"reflect"
 	"syscall"
 	"time"
 
 	"github.com/snikch/goodman"
+	"github.com/snikch/goodman/hooks"
 )
 
 var (
@@ -50,8 +52,9 @@ func main() {
 					fmt.Println("Hooks client failed with " + err.Error())
 				}
 			}()
+			rpcService := reflect.TypeOf((*hooks.HooksRunner)(nil)).Elem().Name()
 			for retries := 5; retries > 0; retries-- {
-				runner, err := goodman.NewRunner("HooksRunner", hookServerInitalPort)
+				runner, err := goodman.NewRunner(rpcService, hookServerInitalPort)
 				if err == nil {
 					runners = append(runners, runner)
 					break
