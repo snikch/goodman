@@ -51,7 +51,7 @@ func main() {
 				}
 			}()
 			for retries := 5; retries > 0; retries-- {
-				runner, err := goodman.NewRunner("Hooks", hookServerInitalPort)
+				runner, err := goodman.NewRunner("HooksRunner", hookServerInitalPort)
 				if err == nil {
 					runners = append(runners, runner)
 					break
