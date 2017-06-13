@@ -8,7 +8,7 @@ Feature: Hook handlers
       """
       require 'sinatra'
       get '/message' do
-        "Hello World!\n\n"
+        "Hello World!\n"
       end
       """
 
@@ -17,9 +17,12 @@ Feature: Hook handlers
       # My Api
       ## GET /message
       + Request (text)
-          test this
+
+              test this
+
       + Response 200 (text/html;charset=utf-8)
-          Hello World!
+
+              Hello World!
       """
 
   @debug
@@ -36,7 +39,7 @@ Feature: Hook handlers
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h)
+          server := hooks.NewServer(hooks.NewHooksRunner(h))
           h.BeforeAll(func(t []*trans.Transaction) {
             fmt.Println("before all hook handled")
           })

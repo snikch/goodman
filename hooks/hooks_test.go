@@ -43,7 +43,7 @@ func TestRunnerImplementation(t *testing.T) {
 	tss := trans.Transaction{
 		Name: name,
 	}
-	var hooks RunnerRPC
+	var hooks *Hooks
 	var invoked bool
 	reply := []*trans.Transaction{}
 	cbs := []Callback{
@@ -61,19 +61,19 @@ func TestRunnerImplementation(t *testing.T) {
 			hooks = &Hooks{
 				beforeAll: allCbs,
 			}
-			hooks.RunBeforeAll([]*trans.Transaction{&tss}, &reply)
+			NewHooksRunner(hooks).RunBeforeAll([]*trans.Transaction{&tss}, &reply)
 		},
 		func() {
 			hooks = &Hooks{
 				beforeEach: cbs,
 			}
-			hooks.RunBeforeEach(tss, &tss)
+			NewHooksRunner(hooks).RunBeforeEach(tss, &tss)
 		},
 		func() {
 			hooks = &Hooks{
 				beforeEachValidation: cbs,
 			}
-			hooks.RunBeforeEachValidation(tss, &tss)
+			NewHooksRunner(hooks).RunBeforeEachValidation(tss, &tss)
 		},
 		func() {
 			before := map[string][]Callback{
@@ -82,7 +82,7 @@ func TestRunnerImplementation(t *testing.T) {
 			hooks = &Hooks{
 				before: before,
 			}
-			hooks.RunBefore(tss, &tss)
+			NewHooksRunner(hooks).RunBefore(tss, &tss)
 		},
 		func() {
 			beforeValidation := map[string][]Callback{
@@ -91,7 +91,7 @@ func TestRunnerImplementation(t *testing.T) {
 			hooks = &Hooks{
 				beforeValidation: beforeValidation,
 			}
-			hooks.RunBeforeValidation(tss, &tss)
+			NewHooksRunner(hooks).RunBeforeValidation(tss, &tss)
 		},
 		func() {
 			after := map[string][]Callback{
@@ -100,19 +100,19 @@ func TestRunnerImplementation(t *testing.T) {
 			hooks = &Hooks{
 				after: after,
 			}
-			hooks.RunAfter(tss, &tss)
+			NewHooksRunner(hooks).RunAfter(tss, &tss)
 		},
 		func() {
 			hooks = &Hooks{
 				afterEach: cbs,
 			}
-			hooks.RunAfterEach(tss, &tss)
+			NewHooksRunner(hooks).RunAfterEach(tss, &tss)
 		},
 		func() {
 			hooks = &Hooks{
 				afterAll: allCbs,
 			}
-			hooks.RunAfterAll([]*trans.Transaction{&tss}, &reply)
+			NewHooksRunner(hooks).RunAfterAll([]*trans.Transaction{&tss}, &reply)
 		},
 	}
 	for _, hookFn := range fns {

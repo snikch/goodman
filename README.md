@@ -44,7 +44,7 @@ import (
 
 func main() {
       h := hooks.NewHooks()
-      server := hooks.NewServer(h)
+      server := hooks.NewServer(hooks.NewHooksRunner(h))
       h.Before("/message > GET", func(t *trans.Transaction) {
           fmt.Println("before modification")
       })

@@ -8,7 +8,7 @@ Feature: Multiple hook files with a glob
       """
       require 'sinatra'
       get '/message' do
-        "Hello World!\n\n"
+        "Hello World!\n"
       end
       """
 
@@ -17,9 +17,12 @@ Feature: Multiple hook files with a glob
       # My Api
       ## GET /message
       + Request (text)
-          This prevents a dredd bug
+
+              This prevents a dredd bug
+
       + Response 200 (text/html;charset=utf-8)
-          Hello World!
+
+              Hello World!
       """
 
   @debug
@@ -36,7 +39,7 @@ Feature: Multiple hook files with a glob
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h)
+          server := hooks.NewServer(hooks.NewHooksRunner(h))
           h.Before("/message > GET", func(t *trans.Transaction) {
             fmt.Println("It's me, File1")
           })
@@ -58,7 +61,7 @@ Feature: Multiple hook files with a glob
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h)
+          server := hooks.NewServer(hooks.NewHooksRunner(h))
           h.Before("/message > GET", func(t *trans.Transaction) {
             fmt.Println("It's me, File2")
           })
@@ -80,7 +83,7 @@ Feature: Multiple hook files with a glob
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h)
+          server := hooks.NewServer(hooks.NewHooksRunner(h))
           h.Before("/message > GET", func(t *trans.Transaction) {
             fmt.Println("It's me, File3")
           })

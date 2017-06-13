@@ -8,7 +8,7 @@ Feature: Failing a transaction
       """
       require 'sinatra'
       get '/message' do
-        "Hello World!\n\n"
+        "Hello World!\n"
       end
       """
 
@@ -17,9 +17,12 @@ Feature: Failing a transaction
       # My Api
       ## GET /message
       + Request (text)
-        This prevents dredd bug
+
+              This prevents dredd bug
+
       + Response 200 (text/html;charset=utf-8)
-          Hello World!
+
+              Hello World!
       """
 
   @debug
@@ -34,7 +37,7 @@ Feature: Failing a transaction
 
       func main() {
           h := hooks.NewHooks()
-          server := hooks.NewServer(h)
+          server := hooks.NewServer(hooks.NewHooksRunner(h))
           h.Before("/message > GET", func(t *trans.Transaction) {
               t.Fail = "Yay! Failed!"
           })
