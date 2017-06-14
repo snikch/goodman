@@ -3,8 +3,9 @@ package transaction
 import "encoding/json"
 
 // Transaction represents a Dredd transaction object.
-// http://dredd.readthedocs.org/en/latest/hooks/#transaction-object-structure
+// http://dredd.readthedocs.io/en/latest/data-structures/#transaction
 type Transaction struct {
+	Id       string `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
 	Host     string `json:"host,omitempty"`
 	Port     string `json:"port,omitempty"`
