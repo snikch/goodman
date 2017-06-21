@@ -34,7 +34,7 @@ func main() {
 		closeHooksServers()
 		os.Exit(0)
 	}()
-	hooksServerCount = len(args) - 1
+	hooksServerCount = len(hookPaths)
 	if len(args) < 2 {
 		runners = append(runners, &goodman.DummyRunner{})
 	} else {
@@ -45,11 +45,13 @@ func main() {
 			fmt.Println("Sending to channel\n")
 			cmds <- cmd
 			fmt.Println("Completed")
+			log.Printf("Starting hooks server")
+			if err := cmd.Start(); err != nil {
+				panic("Failed to start hooks server " + err.Error())
+			}
 			go func() {
-				log.Printf("Starting hooks server in go routine")
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Hooks client failed with " + err.Error())
+				if err := cmd.Wait(); err != nil {
+					fmt.Println("Hooks server failed with " + err.Error())
 				}
 			}()
 			rpcService := reflect.TypeOf((*hooks.HooksRunner)(nil)).Elem().Name()
