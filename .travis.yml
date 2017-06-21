@@ -16,7 +16,7 @@ env:
 install:
   - go get -u github.com/kardianos/govendor
   - go install github.com/kardianos/govendor
-  - go build -o $GOPATH/bin/goodman github.com/snikch/goodman/cmd/goodman
+  - go build -race -o $GOPATH/bin/goodman github.com/snikch/goodman/cmd/goodman
   - cd example && $GOPATH/bin/govendor sync && cd ..
 
 go_import_path: github.com/snikch/goodman
