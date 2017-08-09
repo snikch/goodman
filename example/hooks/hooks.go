@@ -36,6 +36,9 @@ func main() {
 			log.Fatal(err)
 		}
 	})
+	h.Before("Users > Endpoint > Retrieve all users", func(t *trans.Transaction) {
+		t.Skip = true
+	})
 	h.AfterAll(func(t []*trans.Transaction) {
 		os.Remove("./foo.db")
 	})
