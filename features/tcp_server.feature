@@ -13,7 +13,7 @@ Scenario: Message exchange for event beforeEach
   And I connect to the server
   And I send a JSON message to the socket:
     """
-    {"event": "beforeEach", "uuid": "1234-abcd", "data": {}}
+    {"event": "beforeEach", "uuid": "1234-abcd", "data": {"skip":true}}
     """
   And I send a newline character as a message delimiter to the socket
   Then I should receive same response
@@ -25,7 +25,7 @@ Scenario: Message exchange for event beforeEachValidation
   And I connect to the server
   And I send a JSON message to the socket:
     """
-    {"event": "beforeEachValidation", "uuid": "2234-abcd", "data": {}}
+    {"event": "beforeEachValidation", "uuid": "2234-abcd", "data": {"skip":false}}
     """
   And I send a newline character as a message delimiter to the socket
   Then I should receive same response
@@ -37,7 +37,7 @@ Scenario: Message exchange for event afterEach
   And I connect to the server
   And I send a JSON message to the socket:
     """
-    {"event": "afterEach", "uuid": "3234-abcd", "data": {}}
+    {"event": "afterEach", "uuid": "3234-abcd", "data": {"skip":true}}
     """
   And I send a newline character as a message delimiter to the socket
   Then I should receive same response
@@ -49,7 +49,7 @@ Scenario: Message exchange for event beforeAll
   And I connect to the server
   And I send a JSON message to the socket:
     """
-    {"event": "beforeAll", "uuid": "4234-abcd", "data": []}
+    {"event": "beforeAll", "uuid": "4234-abcd", "data": [{"skip":false}]}
     """
   And I send a newline character as a message delimiter to the socket
   Then I should receive same response
@@ -61,7 +61,7 @@ Scenario: Message exchange for event afterAll
   And I connect to the server
   And I send a JSON message to the socket:
     """
-    {"event": "afterAll", "uuid": "5234-abcd", "data": []}
+    {"event": "afterAll", "uuid": "5234-abcd", "data": [{"skip":true}]}
     """
   And I send a newline character as a message delimiter to the socket
   Then I should receive same response

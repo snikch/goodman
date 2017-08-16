@@ -32,7 +32,7 @@ Then(/^I should receive same response$/) do
   sleep 1
   data_received = @client.readline
   if JSON.parse(data_received) != JSON.parse(@data_sent)
-    @client.close!
+    @client.close
     raise "Data received:\n#{data_received}\nDoesn't match data sent: #{@data_sent}\n"
   end
 end
