@@ -17,8 +17,13 @@ type Transaction struct {
 		URI     string                 `json:"uri,omitempty"`
 		Method  string                 `json:"method,omitempty"`
 	} `json:"request,omitempty"`
-	Expected *json.RawMessage `json:"expected,omitempty"`
-	Real     *struct {
+	Expected *struct {
+		StatusCode string                 `json:"statusCode,omitempty"`
+		Body       string                 `json:"body,omitempty"`
+		Headers    map[string]interface{} `json:"headers,omitempty"`
+		Schema     *json.RawMessage       `json:"schema,omitempty"`
+	} `json:"expected,omitempty"`
+	Real *struct {
 		Body       string                 `json:"body"`
 		Headers    map[string]interface{} `json:"headers"`
 		StatusCode int                    `json:"statusCode"`
