@@ -16,17 +16,17 @@ import (
 )
 
 var (
-	c                    chan os.Signal
-	cmds                 chan *exec.Cmd
-	runners              []goodman.Runner
-	hookServerInitalPort = 61322
-	hooksServerCount     int
+	c                     chan os.Signal
+	cmds                  chan *exec.Cmd
+	runners               []goodman.Runner
+	hookServerInitialPort = 61322
+	hooksServerCount      int
 )
 
 func main() {
 	cmds = make(chan *exec.Cmd, 50)
 	args := os.Args
-	hookPaths := args[1:len(args)]
+	hookPaths := args[1:]
 	c = make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -39,7 +39,7 @@ func main() {
 		runners = append(runners, &goodman.DummyRunner{})
 	} else {
 		for _, path := range hookPaths {
-			cmd := exec.Command(path, fmt.Sprintf("-port=%d", hookServerInitalPort))
+			cmd := exec.Command(path, fmt.Sprintf("-port=%d", hookServerInitialPort))
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			fmt.Println("Sending to channel\n")
@@ -56,7 +56,7 @@ func main() {
 			}()
 			rpcService := reflect.TypeOf((*hooks.HooksRunner)(nil)).Elem().Name()
 			for retries := 5; retries > 0; retries-- {
-				runner, err := goodman.NewRunner(rpcService, hookServerInitalPort)
+				runner, err := goodman.NewRunner(rpcService, hookServerInitialPort)
 				if err == nil {
 					runners = append(runners, runner)
 					break
@@ -72,7 +72,7 @@ func main() {
 				}
 				panic(err.Error())
 			}
-			hookServerInitalPort++
+			hookServerInitialPort++
 		}
 	}
 	close(cmds)
