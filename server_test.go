@@ -21,19 +21,19 @@ func TestSendingServerMessages(t *testing.T) {
 		Payload []byte
 	}{
 		{
-			Payload: []byte("{\"uuid\":\"1234-abcd\",\"event\":\"beforeEach\",\"data\":{}}\n"),
+			Payload: []byte("{\"uuid\":\"1234-abcd\",\"event\":\"beforeEach\",\"data\":{\"skip\":false}}\n"),
 		},
 		{
-			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"beforeEachValidation\",\"data\":{}}\n"),
+			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"beforeEachValidation\",\"data\":{\"skip\":true}}\n"),
 		},
 		{
-			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterEach\",\"data\":{}}\n"),
+			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterEach\",\"data\":{\"skip\":false}}\n"),
 		},
 		{
-			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"beforeAll\",\"data\":[]}\n"),
+			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"beforeAll\",\"data\":[{\"skip\":true}]}\n"),
 		},
 		{
-			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterAll\",\"data\":[]}\n"),
+			Payload: []byte("{\"uuid\":\"2234-abcd\",\"event\":\"afterAll\",\"data\":[{\"skip\":false}]}\n"),
 		},
 	}
 

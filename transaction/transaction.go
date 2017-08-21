@@ -26,7 +26,7 @@ type Transaction struct {
 	Origin  *json.RawMessage `json:"origin,omitempty"`
 	Test    *json.RawMessage `json:"test,omitempty"`
 	Results *json.RawMessage `json:"results,omitempty"`
-	Skip    bool             `json:"skip,omitempty"`
+	Skip    bool             `json:"skip"`
 	Fail    interface{}      `json:"fail,omitempty"`
 
 	TestOrder []string `json:"hooks_modifications,omitempty"`
