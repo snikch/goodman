@@ -21,7 +21,7 @@ type Transaction struct {
 		StatusCode string                 `json:"statusCode,omitempty"`
 		Body       string                 `json:"body,omitempty"`
 		Headers    map[string]interface{} `json:"headers,omitempty"`
-		Schema     *json.RawMessage       `json:"schema,omitempty"`
+		Schema     *json.RawMessage       `json:"bodySchema,omitempty"`
 	} `json:"expected,omitempty"`
 	Real *struct {
 		Body       string                 `json:"body"`
